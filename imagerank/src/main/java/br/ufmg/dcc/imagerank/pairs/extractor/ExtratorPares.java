@@ -236,7 +236,7 @@ public class ExtratorPares
 	{
 		LOG.info("Processando pares...");
 
-		final ExecutorService poolThead = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		final ExecutorService poolThread = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 		final List<ImageProcessorException> errosProcessamento = new ArrayList<ImageProcessorException>();
 
 		for (final ParDTO par : pares)
@@ -247,7 +247,7 @@ public class ExtratorPares
 				System.out.println();
 			}
 
-			poolThead.submit(new Runnable()
+			poolThread.submit(new Runnable()
 			{
 				public void run()
 				{
@@ -268,7 +268,7 @@ public class ExtratorPares
 		}
 
 		// Força a finalização do pool, sem cancelar as threads já iniciadas.
-		poolThead.shutdown();
+		poolThread.shutdown();
 		int tempo = 1;
 		do
 		{
@@ -286,7 +286,7 @@ public class ExtratorPares
 				// ignora
 			}
 		}
-		while(!poolThead.isTerminated());
+		while(!poolThread.isTerminated());
 		System.out.println("Pares processados: " + contador + " - " + tempo + "s");
 
 		if (errosProcessamento.size() > 0)
