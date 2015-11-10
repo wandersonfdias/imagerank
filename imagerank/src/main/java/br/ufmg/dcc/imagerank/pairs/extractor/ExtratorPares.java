@@ -534,7 +534,7 @@ public class ExtratorPares
 		try
 		{
 			String fullPathImagem = this.getFullPathImagem();
-			Collection<File> files = FileUtils.listFiles(new File(fullPathImagem), new String[]{ImageRankConstants.EXTENSAO_IMAGEM}, true);
+			Collection<File> files = FileUtils.listFiles(new File(fullPathImagem), new String[]{ImageRankConstants.JPEG_IMAGE_EXTENSION}, true);
 			return ((files != null && !files.isEmpty()) ? new LinkedList<File>(files) : null); // mantém a ordem da lista
 		}
 		catch (IllegalArgumentException e)

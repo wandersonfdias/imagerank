@@ -11,5 +11,5 @@ public interface ImageRankConstants
 	String FILENAME_SEPARATOR = ".";
 	int DESCRIPTOR_PRECISION_VALUE = 10;
 	Character PAIR_ID_SEPARATOR = '|';
-	String EXTENSAO_IMAGEM = "jpg";
+	String JPEG_IMAGE_EXTENSION = "jpg";
 }
