@@ -6,6 +6,8 @@ package br.ufmg.dcc.imagerank.constants;
 public interface ImageRankConstants
 {
 	String PAIR_OUTPUT_FILENAME = "pares.txt";
+	String WEKA_PAIR_OUTPUT_FILENAME = "pares.arff";
+	String DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME = "pares_discretizados.arff";
 	String FIELD_SEPARATOR = ",";
 	String LINE_SEPARATOR = "\n";
 	String FILENAME_SEPARATOR = ".";

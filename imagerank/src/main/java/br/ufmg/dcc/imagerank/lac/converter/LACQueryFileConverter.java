@@ -69,6 +69,16 @@ public class LACQueryFileConverter
 	 */
 	public void convert() throws ProcessorException
 	{
+		this.convert(true); // gera arquivos de treino e teste
+	}
+
+	/**
+	 * Converte o arquivo do WEKA em arquivos de treino/teste do LAC
+	 * @param generateTestFile Indica se deve gerar o arquivo de teste
+	 * @throws ProcessorException
+	 */
+	public void convert(boolean generateTestFile) throws ProcessorException
+	{
 		BufferedReader reader = null;
 		try
 		{
@@ -94,24 +104,34 @@ public class LACQueryFileConverter
 
 			// cria os arquivos de treino/teste
 			File trainingFile = this.createOutputFile(ARQUIVO_TREINO);
-			File testFile = this.createOutputFile(ARQUIVO_TESTE);
+			File testFile = null;
+			if (generateTestFile)
+			{
+				testFile = this.createOutputFile(ARQUIVO_TESTE);
+			}
 
 			// separa percentuais para treino e teste
-			final int percentualTreino = 80;
+			final int percentualTreino = (generateTestFile ? 80 : 100);
 			final int percentualTeste = 100 - percentualTreino;
 
 			int qtdeTreino = percentualTreino / 10;
-			int qtdeTeste = percentualTeste / 10;
+			int qtdeTeste = (percentualTeste > 0 ? (percentualTeste / 10) : 0);
 
 			if (qtdeTreino%2 == 0 && qtdeTeste%2 == 0)
 			{
 				qtdeTreino = qtdeTreino/2;
-				qtdeTeste = qtdeTeste/2;
+				if (qtdeTeste > 0)
+				{
+					qtdeTeste = qtdeTeste/2;
+				}
 			}
 			else if (qtdeTreino%3 == 0 && qtdeTeste%3 == 0)
 			{
 				qtdeTreino = qtdeTreino/3;
-				qtdeTeste = qtdeTeste/3;
+				if (qtdeTeste > 0)
+				{
+					qtdeTeste = qtdeTeste/3;
+				}
 			}
 
 			int qtdeTempSeparadaTreino = 0;
@@ -126,7 +146,7 @@ public class LACQueryFileConverter
 			while (iterator.hasNext())
 			{
 				boolean adicionarTreino = (qtdeTempSeparadaTreino < qtdeTreino);
-				boolean adicionarTeste = (!adicionarTreino && (qtdeTempSeparadaTeste < qtdeTeste));
+				boolean adicionarTeste = (!adicionarTreino && generateTestFile && (qtdeTempSeparadaTeste < qtdeTeste));
 
 				if (!adicionarTreino && !adicionarTeste)
 				{
