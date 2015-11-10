@@ -13,12 +13,24 @@ import br.ufmg.dcc.imagerank.weka.util.DiscretizeDataSet;
 import br.ufmg.dcc.imagerank.weka.util.WekaConversor;
 
 /**
+ * Realiza geração da base de treino para processamento de imagens.
  * @author Wanderson Ferreira Dias - <code>wandersonf.dias@gmail.com</code>
  */
 public class ImageRankBatchProcessor
 {
 	private static final Log LOG = LogFactory.getLog(ImageRankBatchProcessor.class);
 
+	/**
+	 * Realiza geração da base de treino para processamento de imagens.<br><br>
+	 * Passos do processamento:<br>
+	 * 1. Extrair descritores da imagem de consulta.<br>
+	 * 2. Gerar arquivos de pares aleatórios e normalizados.<br>
+	 * 3. Converter arquivo de pares para formato weka.<br>
+	 * 4. Discretizar arquivos de pares.<br>
+	 * 5. Gerar arquivo de treino no formato do LAC.<br>
+	 * @param args
+	 * @throws ProcessorException
+	 */
 	public static void main(String[] args) throws ProcessorException
 	{
 		try
