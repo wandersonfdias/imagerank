@@ -29,30 +29,59 @@ public class RandomPairGenerator
 {
 	private static final Log LOG = LogFactory.getLog(RandomPairGenerator.class);
 
-	private static final int TOTAL_PARES_A_GERAR = 100000*6;
+	private static int TOTAL_PARES_A_GERAR = 100000*1; // default 100.000
 
 	private static Map<String, Boolean> controlePares;
 
 	/**
-	 * Teste
+	 * Gera pares aleatórios, calculando as distâncias dos descritores de cada par, com base no arquivo de pares fornecido
 	 * @param args
+	 * @throws ProcessorException
 	 */
 	public static void main(String[] args) throws ProcessorException
 	{
-		LOG.info("Iniciando processamento...");
+		if (args == null || args.length < 5)
+		{
+			String parameters = "\n\tParâmetro 1: diretorioBase (Path raiz para o subdiretório de imagens. Ex: /opt/extrai_descritores)"
+					+ "\n\tParâmetro 2: diretorioImagens (Nome do subdiretório de imagens. Ex: imagens)"
+					+ "\n\tParâmetro 3: diretorioDescritores (Nome do subdiretório de descritores. Ex: descritores)"
+					+ "\n\tParâmetro 4: diretorioSaida (Nome do subdiretório para gravação do arquivos de pares. Ex: pares)"
+					+ "\n\tParâmetro 5: arquivoPares (Path completo para o arquivo de pares. Ex: /opt/pares/arquivo-pares.dat)"
+					+ "\n\tParâmetro 6 <opcional>: totalParesGerar (Total de pares para geração. Ex: 500000 - Default: 100000 )"
+					+ "\n"
+					;
+			throw new ProcessorException("Parâmetros obrigatórios não informados." + parameters);
+		}
 
-		String diretorioBase = System.getenv("HOME") + "/extrai_descritores";
-		String diretorioImagens = "imagens";
-		String diretorioDescritores = "descritores";
-		String diretorioSaida = "pares";
-		String arquivoPares = diretorioBase + "/diego/tag-classes-reduced.dat";
+		String diretorioBase = args[0];
+		String diretorioImagens = args[1];
+		String diretorioDescritores = args[2];
+		String diretorioSaida = args[3];
+		String arquivoPares = args[4];
+
+		if (args.length >= 6)
+		{
+			try
+			{
+				TOTAL_PARES_A_GERAR = new Integer(args[5]);
+			}
+			catch (Exception e)
+			{
+				throw new ProcessorException(String.format("Parâmetros totalParesGerar inválido. Favor informar um valor válido. Valor informado: '%s'.", args[5]));
+			}
+		}
+
 		controlePares = new HashMap<String, Boolean>();
 
+		LOG.info("Iniciando processamento...");
 		try
 		{
 			LOG.info("Montando pares de imagens...");
+
+			// obtém os pares básicos de imagens para processamento
 			List<ParDTO> pares = getParesImagens(diretorioBase, diretorioImagens, arquivoPares);
 
+			// processa os pares, ou seja, calcula as distâncias entre os descritores de cada par
 			ExtratorPares extrator = new ExtratorPares(diretorioBase, diretorioImagens, diretorioDescritores, diretorioSaida);
 			extrator.processar(pares);
 		}
@@ -70,6 +99,14 @@ public class RandomPairGenerator
 		LOG.info("Fim...");
 	}
 
+	/**
+	 * Obtém os pares básicos de imagens para processamento
+	 * @param diretorioBase
+	 * @param diretorioImagens
+	 * @param arquivoPares
+	 * @return
+	 * @throws IOException
+	 */
 	private static List<ParDTO> getParesImagens(String diretorioBase, String diretorioImagens, String arquivoPares) throws IOException
 	{
 		List<ParDTO> pares = new ArrayList<ParDTO>();
@@ -85,13 +122,13 @@ public class RandomPairGenerator
 			lnr = new LineNumberReader(br);
 
 			int totalLineNumbers = getTotalLineNumbers(arquivoPares);
-			Set<Integer> lineNumbers = getLineNumbers(totalLineNumbers);
+			Set<Integer> randomLineNumbers = getRandomLineNumbers(totalLineNumbers);
 
 			String line = null;
 			while ((line = lnr.readLine()) != null)
 			{
 				int lineNumber = lnr.getLineNumber();
-				if (lineNumbers.contains(lineNumber))
+				if (randomLineNumbers.contains(lineNumber))
 				{
 					String[] dadosLinha = StringUtils.split(line, StringUtils.SPACE);
 
@@ -165,6 +202,12 @@ public class RandomPairGenerator
 		return exists;
 	}
 
+	/**
+	 * Obtém o total de linhas do arquivo de pares original
+	 * @param arquivoPares
+	 * @return
+	 * @throws IOException
+	 */
 	private static int getTotalLineNumbers(String arquivoPares) throws IOException
 	{
 		int total = 0;
@@ -193,7 +236,12 @@ public class RandomPairGenerator
 		return total;
 	}
 
-	private static Set<Integer> getLineNumbers(int totalLineNumbers)
+	/**
+	 * Obtém as linhas aleatórias do arquivo de pares original, para geração dos pares com distâncias
+	 * @param totalLineNumbers
+	 * @return
+	 */
+	private static Set<Integer> getRandomLineNumbers(int totalLineNumbers)
 	{
 		Random random = new Random(System.currentTimeMillis());
 

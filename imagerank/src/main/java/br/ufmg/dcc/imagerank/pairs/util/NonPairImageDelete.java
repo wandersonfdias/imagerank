@@ -82,7 +82,13 @@ public class NonPairImageDelete
 				}
 			}
 
-			List<File> images = getImages(getFullPath(diretorioBase, diretorioImagens));
+			String fullPathImagens = getFullPath(diretorioBase, diretorioImagens);
+			List<File> images = getImages(fullPathImagens);
+
+			if (images == null || images.isEmpty())
+			{
+				throw new Exception(String.format("Nenhuma imagem foi encontrada no diretório '%s'.", fullPathImagens));
+			}
 			for (File image : images)
 			{
 				if (!imagens.contains(image.getName()))
