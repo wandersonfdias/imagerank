@@ -23,6 +23,7 @@ import br.ufmg.dcc.imagerank.pairs.dto.ParDTO;
 import br.ufmg.dcc.imagerank.pairs.extractor.ExtratorPares;
 
 /**
+ * Gera pares aleatórios de imagens, considerando um arquivo original de pares, e calcula as as distâncias entre os descritores de cada par de imagem
  * @author Wanderson Ferreira Dias - <code>wandersonf.dias@gmail.com</code>
  */
 public class RandomPairGenerator
