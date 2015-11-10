@@ -41,7 +41,7 @@ public class NonPairImageDelete
 	{
 		if (args == null || args.length < 3)
 		{
-			String parameters = "\n\tParâmetro 1: diretorioBase (<i>Path raiz para o subdiretório de imagens. Ex: /opt/extrai_descritores)"
+			String parameters = "\n\tParâmetro 1: diretorioBase (Path raiz para o subdiretório de imagens. Ex: /opt/extrai_descritores)"
 					+ "\n\tParâmetro 2: diretorioImagens (Nome do subdiretório de imagens. Ex: imagens)"
 					+ "\n\tParâmetro 3: arquivoPares (Path completo para o arquivo de pares. Ex: /opt/pares/arquivo-pares.dat)"
 					+ "\n"
