@@ -39,13 +39,18 @@ public class NonPairImageDelete
 	 */
 	public static void main(String[] args) throws Exception
 	{
-//		if (args == null || args.length < 3)
-//		{
-//			throw new Exception("Parâmetros obrigatórios não informados.");
-//		}
-		String diretorioBase = System.getenv("HOME") + "/extrai_descritores";
-		String diretorioImagens = "imagens";
-		String arquivoPares = diretorioBase + "/diego/tag-classes-reduced.dat";
+		if (args == null || args.length < 3)
+		{
+			String parameters = "\n\tParâmetro 1: diretorioBase (<i>Path raiz para o subdiretório de imagens. Ex: /opt/extrai_descritores)"
+					+ "\n\tParâmetro 2: diretorioImagens (Nome do subdiretório de imagens. Ex: imagens)"
+					+ "\n\tParâmetro 3: arquivoPares (Path completo para o arquivo de pares. Ex: /opt/pares/arquivo-pares.dat)"
+					+ "\n"
+					;
+			throw new Exception("Parâmetros obrigatórios não informados." + parameters);
+		}
+		String diretorioBase = args[0];
+		String diretorioImagens = args[1];
+		String arquivoPares = args[2];
 
 		FileReader fileReader = null;
 		BufferedReader bufferedReader = null;
