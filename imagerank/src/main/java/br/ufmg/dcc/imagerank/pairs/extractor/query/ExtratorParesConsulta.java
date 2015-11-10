@@ -1,4 +1,4 @@
-package br.ufmg.dcc.imagerank.pairs.extractor;
+package br.ufmg.dcc.imagerank.pairs.extractor.query;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -36,20 +35,23 @@ import br.ufmg.dcc.imagerank.pairs.dto.ParDTO;
 import br.ufmg.dcc.imagerank.util.ImageRankUtils;
 
 /**
+ * Extrai pares de imagens para uma consulta específica
  * @author Wanderson Ferreira Dias - <code>wandersonf.dias@gmail.com</code>
  */
-public class ExtratorPares
+public class ExtratorParesConsulta
 {
 	private static final MathContext MATH_CONTEXT = new MathContext(ImageRankConstants.DESCRIPTOR_PRECISION_VALUE);
-
-	private static final int TOTAL_PARES_A_GERAR = 100000;
-
-	private static final Log LOG = LogFactory.getLog(ExtratorPares.class);
+	private static final Log LOG = LogFactory.getLog(ExtratorParesConsulta.class);
 
 	/**
-	 * Diretório base para processamento das imagens
+	 * Diretório da base de completa para processamento das imagens
 	 */
-	private String diretorioBase;
+	private String diretorioBaseCompleta;
+
+	/**
+	 * Diretório da base de consulta para processamento das imagens
+	 */
+	private String diretorioBaseConsulta;
 
 	/**
 	 * Diretório base das imagens
@@ -66,24 +68,32 @@ public class ExtratorPares
 	 */
 	private String diretorioSaida;
 
-	private Map<String, Boolean> pares;
-	private Random randomGenerator;
+	/**
+	 * Total de pares a serem gerados
+	 */
+	private int totalParesGerar;
 
+	private Map<Integer, Boolean> pares;
+	private Random randomGenerator;
 	private static int contador = 0;
 
 	/**
-	 * Construtor padrão
-	 * @param diretorioBase
+	 * @param diretorioBaseCompleta
+	 * @param diretorioBaseConsulta
 	 * @param diretorioImagens
 	 * @param diretorioDescritores
+	 * @param diretorioSaida
+	 * @param totalParesGerar
 	 */
-	public ExtratorPares(String diretorioBase, String diretorioImagens, String diretorioDescritores, String diretorioSaida)
+	public ExtratorParesConsulta(String diretorioBaseCompleta, String diretorioBaseConsulta, String diretorioImagens, String diretorioDescritores, String diretorioSaida, int totalParesGerar)
 	{
 		super();
-		this.diretorioBase = StringUtils.trimToNull(diretorioBase);
+		this.diretorioBaseCompleta = StringUtils.trimToNull(diretorioBaseCompleta);
+		this.diretorioBaseConsulta = StringUtils.trimToNull(diretorioBaseConsulta);
 		this.diretorioImagens = StringUtils.trimToNull(diretorioImagens);
 		this.diretorioDescritores = StringUtils.trimToNull(diretorioDescritores);
 		this.diretorioSaida = StringUtils.trimToNull(diretorioSaida);
+		this.totalParesGerar = totalParesGerar;
 	}
 
 	/**
@@ -92,8 +102,9 @@ public class ExtratorPares
 	 */
 	private boolean isValidParameters()
 	{
-		return (StringUtils.isNotBlank(this.diretorioBase) && StringUtils.isNotBlank(this.diretorioImagens)
-				&& StringUtils.isNotBlank(this.diretorioDescritores) && StringUtils.isNotBlank(this.diretorioSaida));
+		return (StringUtils.isNotBlank(this.diretorioBaseCompleta) && StringUtils.isNotBlank(this.diretorioBaseConsulta)
+				&& StringUtils.isNotBlank(this.diretorioImagens) && StringUtils.isNotBlank(this.diretorioDescritores)
+				&& StringUtils.isNotBlank(this.diretorioSaida) && this.totalParesGerar > 0);
 	}
 
 	/**
@@ -101,7 +112,7 @@ public class ExtratorPares
 	 */
 	private void inicializaVariavies()
 	{
-		this.pares = new HashMap<String, Boolean>();
+		this.pares = new HashMap<Integer, Boolean>();
 		this.randomGenerator = new Random();
 		this.randomGenerator.setSeed(System.currentTimeMillis());
 		contador = 0;
@@ -117,122 +128,88 @@ public class ExtratorPares
 
 		if (!this.isValidParameters())
 		{
-			throw new ProcessorException(String.format("Parâmetros de entrada informados inválidos. Diretório base: '%s' -  Diretório imagens: '%s' -  Diretório descritores: '%s' - Diretório saída: '%s'.", this.diretorioBase, this.diretorioImagens, this.diretorioDescritores, this.diretorioSaida));
+			throw new ProcessorException(String.format("Parâmetros de entrada informados inválidos. Diretório base completa: '%s' - Diretório base consulta: '%s' -  Diretório imagens: '%s' -  Diretório descritores: '%s' - Diretório saída: '%s' - Total pares gerar: '%d'."
+													  , this.diretorioBaseCompleta
+													  , this.diretorioBaseConsulta
+													  , this.diretorioImagens
+													  , this.diretorioDescritores
+													  , this.diretorioSaida
+													  , this.totalParesGerar
+													  )
+										);
 		}
 		else
 		{
-			// obtém a lista de imagens
-			List<File> imagens = this.getImages();
-			if (imagens == null || imagens.isEmpty())
+			// obtém  a imagem para consulta
+			File imagemConsulta = this.getImagemBaseConsulta();
+			if (imagemConsulta == null)
 			{
-				throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento.");
+				throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para consulta.");
+			}
+
+			// obtém os descritores da base de consulta
+			List<File> descritoresBaseConsulta = this.getDescriptors(this.getFullPathBaseConsulta(this.diretorioDescritores));
+			if (descritoresBaseConsulta == null || descritoresBaseConsulta.isEmpty())
+			{
+				throw new DescriptorsNotFoundException("Não foi encontrado nenhum descritor de imagens na base de consulta.");
+			}
+
+			// obtém a lista de imagens da base completa
+			List<File> imagensBaseCompleta = this.getImagensBaseCompleta();
+			if (imagensBaseCompleta == null || imagensBaseCompleta.isEmpty())
+			{
+				throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento na base completa.");
 			}
 			else
 			{
-				// obtém a lista de descritores
-				List<File> descriptors = this.getDescriptors();
-				if (descriptors == null || descriptors.isEmpty())
+				// obtém a lista de descritores da base completa
+				List<File> descritoresBaseCompleta = this.getDescriptors(this.getFullPathBaseCompleta(this.diretorioDescritores));
+				if (descritoresBaseCompleta == null || descritoresBaseCompleta.isEmpty())
 				{
-					throw new DescriptorsNotFoundException("Não foi encontrado nenhum descritor de imagens.");
+					throw new DescriptorsNotFoundException("Não foi encontrado nenhum descritor de imagens na base completa.");
 				}
 				else
 				{
 					// monta a lista de pares únicos de imagens
-					List<ParDTO> pares = this.getParesImagens(imagens);
+					List<ParDTO> pares = this.getParesImagens(imagemConsulta, imagensBaseCompleta);
 
 					// processa os pares
-					this.processar(pares, descriptors);
+					this.processar(pares, descritoresBaseConsulta, descritoresBaseCompleta);
 				}
 			}
 		}
 	}
 
 	/**
-	 * Inicia o processamento das imagens e gera o arquivo de saída
-	 * @param pares
-	 * @throws ProcessorException
-	 */
-	public void processar(List<ParDTO> pares) throws ProcessorException
-	{
-		this.inicializaVariavies();
-
-		if (!this.isValidParameters())
-		{
-			throw new ProcessorException(String.format("Parâmetros de entrada informados inválidos. Diretório base: '%s' -  Diretório imagens: '%s' -  Diretório descritores: '%s' - Diretório saída: '%s'.", this.diretorioBase, this.diretorioImagens, this.diretorioDescritores, this.diretorioSaida));
-		}
-		else
-		{
-			if (pares == null || pares.isEmpty())
-			{
-				throw new ImagesNotFoundException("Não foi encontrado nenhum par de imagens para processamento.");
-			}
-			else
-			{
-				// obtém a lista de descritores
-				List<File> descriptors = this.getDescriptors();
-				if (descriptors == null || descriptors.isEmpty())
-				{
-					throw new DescriptorsNotFoundException("Não foi encontrado nenhum descritor de imagens.");
-				}
-				else
-				{
-					// processa os pares
-					this.processar(pares, descriptors);
-				}
-			}
-		}
-	}
-
-	/**
-	 * @param imagens
+	 * Gera pares de imagens, considerando a imagem de consulta
+	 * @param imagemConsulta
+	 * @param imagensBaseCompleta
 	 * @return
 	 */
-	private List<ParDTO> getParesImagens(List<File> imagens)
+	private List<ParDTO> getParesImagens(File imagemConsulta, List<File> imagensBaseCompleta)
 	{
 		// monta a lista de pares únicos de imagens
 		List<ParDTO> pares = new LinkedList<ParDTO>(); // mantém a ordem da lista
 		do
 		{
-			Map<Integer, Integer> randomImagePair = this.getRandomImagePair(imagens.size());
-			Entry<Integer, Integer> entry = randomImagePair.entrySet().iterator().next();
-			Integer indexImage1 = entry.getKey();
-			Integer indexImage2 = entry.getValue();
+			Integer randomNextUniqueImage = this.getRandomNextUniqueImage(imagensBaseCompleta.size());
 
-			File imagem1 = imagens.get(indexImage1);
-			File imagem2 = imagens.get(indexImage2);
-			pares.add(new ParDTO(imagem1, imagem2, this.getClasse(imagem1, imagem2)));
+			File imagemComparacao = imagensBaseCompleta.get(randomNextUniqueImage);
+			pares.add(new ParDTO(imagemConsulta, imagemComparacao, 0)); // gera sempre com classe 0
 		}
-		while (pares.size() < TOTAL_PARES_A_GERAR);
+		while (pares.size() < this.totalParesGerar);
 
 		return pares;
 	}
 
 	/**
-	 * Obtém a classe da imagem
-	 * @param imagem1
-	 * @param imagem2
-	 * @return
-	 */
-	private int getClasse(File imagem1, File imagem2)
-	{
-		int classe = 0;
-
-		// se o diretório pai for o mesmo, assume-se que é da mesma classe
-		if (imagem1.getParent().equalsIgnoreCase(imagem2.getParent()))
-		{
-			classe = 1;
-		}
-
-		return classe;
-	}
-
-	/**
 	 * Processa os pares de imagens
-	 * @param imagens
-	 * @param descritores
+	 * @param pares
+	 * @param descritoresBaseConsulta
+	 * @param descritoresBaseCompleta
 	 * @throws ProcessorException
 	 */
-	private void processar(final List<ParDTO> pares, final List<File> descriptors) throws ProcessorException
+	private void processar(final List<ParDTO> pares, final List<File> descritoresBaseConsulta, final List<File> descritoresBaseCompleta) throws ProcessorException
 	{
 		LOG.info("Processando pares...");
 
@@ -254,9 +231,9 @@ public class ExtratorPares
 					try
 					{
 						// processa o par de imagens
-						ProcessadorParImagem processadorParImagem = new ProcessadorParImagem(par, descriptors, diretorioBase);
-						processadorParImagem.processar();
-						processadorParImagem = null;
+						ProcessadorParImagemConsulta processadorParImagemConsulta = new ProcessadorParImagemConsulta(par, descritoresBaseConsulta, descritoresBaseCompleta, diretorioBaseConsulta, diretorioBaseCompleta);
+						processadorParImagemConsulta.processar();
+						processadorParImagemConsulta = null;
 						contador++;
 					}
 					catch (ImageProcessorException e)
@@ -302,10 +279,10 @@ public class ExtratorPares
 		{
 			// normaliza os valores dos descritores dos pares
 			LOG.info("Normalizando descritores dos pares...");
-			this.normalizar(pares, descriptors);
+			this.normalizar(pares, descritoresBaseConsulta);
 
 			// grava o arquivo de saída
-			this.writeOutputFile(pares, descriptors);
+			this.writeOutputFile(pares, descritoresBaseConsulta);
 		}
 
 		LOG.info("Fim do processamento");
@@ -465,63 +442,33 @@ public class ExtratorPares
 	}
 
 	/**
-	 * Gera um par de imagem único e aleatório
+	 * Gera uma próxima imagem única e aleatória
 	 * @param totalImagens
 	 * @return
 	 */
-	private Map<Integer, Integer> getRandomImagePair(int totalImagens)
+	private Integer getRandomNextUniqueImage(int totalImagens)
 	{
-		int imageKey1 = 0;
-		int imageKey2 = 0;
+		int imageKey = 0;
 		do
 		{
-			imageKey1 = this.randomGenerator.nextInt(totalImagens-1);
-			imageKey2 = this.randomGenerator.nextInt(totalImagens-1);
+			imageKey = this.randomGenerator.nextInt(totalImagens-1);
 		}
-		while (existsPair(imageKey1, imageKey2));
+		while (existsImageKey(imageKey));
 
+		// adiciona a chave no mapa para controle
+		this.pares.put(imageKey, true);
 
-		Map<Integer, Integer> pair = new HashMap<Integer, Integer>();
-		pair.put(imageKey1, imageKey2);
-
-		// adiciona o par no mapa para controle
-		this.pares.put(this.getPairKey(imageKey1, imageKey2, false), true);
-		this.pares.put(this.getPairKey(imageKey1, imageKey2, true), true);
-
-		return pair;
+		return imageKey;
 	}
 
 	/**
-	 * Gera a chave do par de imagem
-	 * @param key1
-	 * @param key2
-	 * @param inverted
+	 * Verifica se chave da imagem já existe
+	 * @param key
 	 * @return
 	 */
-	private String getPairKey(Integer key1, Integer key2, boolean inverted)
+	private boolean existsImageKey(Integer key)
 	{
-		return new StringBuilder().append((!inverted ? key1 : key2)).append("_").append((!inverted ? key2 : key1)).toString();
-	}
-
-	/**
-	 * Verifica se o par da imagem já existe
-	 * @param key1
-	 * @param key2
-	 * @return
-	 */
-	private boolean existsPair(Integer key1, Integer key2)
-	{
-		boolean exists = false;
-
-		String key = this.getPairKey(key1, key2, false);
-		exists = this.pares.containsKey(key);
-		if (!exists)
-		{
-			String invertedKey = this.getPairKey(key1, key2, true);
-			exists = this.pares.containsKey(invertedKey);
-		}
-
-		return exists;
+		return this.pares.containsKey(key);
 	}
 
 	/**
@@ -529,13 +476,33 @@ public class ExtratorPares
 	 * @return
 	 * @throws ImagesNotFoundException
 	 */
-	private List<File> getImages() throws ImagesNotFoundException
+	private List<File> getImagensBaseCompleta() throws ImagesNotFoundException
 	{
 		try
 		{
-			String fullPathImagem = this.getFullPathImagem();
+			String fullPathImagem = this.getFullPathBaseCompleta(this.diretorioBaseCompleta);
 			Collection<File> files = FileUtils.listFiles(new File(fullPathImagem), new String[]{ImageRankConstants.JPEG_IMAGE_EXTENSION}, true);
 			return ((files != null && !files.isEmpty()) ? new LinkedList<File>(files) : null); // mantém a ordem da lista
+		}
+		catch (IllegalArgumentException e)
+		{
+			throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento.", e);
+		}
+	}
+
+	/**
+	 * Obtém a imagem para consulta
+	 * @return
+	 * @throws ImagesNotFoundException
+	 */
+	private File getImagemBaseConsulta() throws ImagesNotFoundException
+	{
+		try
+		{
+			String fullPathImagem = this.getFullPathBaseConsulta(this.diretorioBaseConsulta);
+			Collection<File> files = FileUtils.listFiles(new File(fullPathImagem), new String[]{ImageRankConstants.JPEG_IMAGE_EXTENSION}, true);
+
+			return ((files != null && !files.isEmpty()) ? new ArrayList<File>(files).get(0) : null);
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -548,12 +515,11 @@ public class ExtratorPares
 	 * @return
 	 * @throws DescriptorsNotFoundException
 	 */
-	private List<File> getDescriptors() throws DescriptorsNotFoundException
+	private List<File> getDescriptors(String fullPathDescriptors) throws DescriptorsNotFoundException
 	{
 		try
 		{
 			List<File> lista = new LinkedList<File>(); // mantém a ordem da lista
-			String fullPathDescriptors = this.getFullPathDescritores();
 
 			File directory = new File(fullPathDescriptors);
 			FileFilter fileFilter = new FileFilter()
@@ -581,13 +547,13 @@ public class ExtratorPares
 	}
 
 	/**
-	 * Cria o arquivo de sáida
+	 * Cria o arquivo de saída (pares) da base de consulta
 	 * @return
 	 * @throws ProcessorException
 	 */
 	private File createOutputFile() throws ProcessorException
 	{
-		String path = this.getFullPathSaida();
+		String path = this.getFullPathBaseConsulta(this.diretorioSaida);
 		File dir = new File(path);
 
 		if (dir.exists())
@@ -664,41 +630,23 @@ public class ExtratorPares
 		}
 	}
 
-
 	/**
-	 * Obtém o path completo referente ao diretório das imagens
-	 * @return
-	 */
-	private String getFullPathImagem()
-	{
-		return this.getFullPath(this.diretorioImagens);
-	}
-
-	/**
-	 * Obtém o path completo referente ao diretório dos descritores
-	 * @return
-	 */
-	private String getFullPathDescritores()
-	{
-		return this.getFullPath(this.diretorioDescritores);
-	}
-
-	/**
-	 * Obtém o path completo referente ao diretório de saída
-	 * @return
-	 */
-	private String getFullPathSaida()
-	{
-		return this.getFullPath(this.diretorioSaida);
-	}
-
-	/**
-	 * Obtém o path base para processamento
+	 * Obtém o path base para processamento na base completa
 	 * @param dir
 	 * @return
 	 */
-	private String getFullPath(String dir)
+	private String getFullPathBaseCompleta(String dir)
 	{
-		return new StringBuilder(this.diretorioBase).append(File.separator).append(dir).append(File.separator).toString();
+		return new StringBuilder(this.diretorioBaseCompleta).append(File.separator).append(dir).append(File.separator).toString();
+	}
+
+	/**
+	 * Obtém o path base para processamento na base de consulta
+	 * @param dir
+	 * @return
+	 */
+	private String getFullPathBaseConsulta(String dir)
+	{
+		return new StringBuilder(this.diretorioBaseConsulta).append(File.separator).append(dir).append(File.separator).toString();
 	}
 }

@@ -69,15 +69,16 @@ public class LACQueryFileConverter
 	 */
 	public void convert() throws ProcessorException
 	{
-		this.convert(true); // gera arquivos de treino e teste
+		this.convert(true, true); // gera arquivos de treino e teste
 	}
 
 	/**
 	 * Converte o arquivo do WEKA em arquivos de treino/teste do LAC
+	 * @param generateTrainingFile Indica se deve gerar o arquivo de treino
 	 * @param generateTestFile Indica se deve gerar o arquivo de teste
 	 * @throws ProcessorException
 	 */
-	public void convert(boolean generateTestFile) throws ProcessorException
+	public void convert(boolean generateTrainingFile, boolean generateTestFile) throws ProcessorException
 	{
 		BufferedReader reader = null;
 		try
@@ -103,7 +104,11 @@ public class LACQueryFileConverter
 			this.createOutputDir();
 
 			// cria os arquivos de treino/teste
-			File trainingFile = this.createOutputFile(ARQUIVO_TREINO);
+			File trainingFile = null;
+			if (generateTrainingFile)
+			{
+				trainingFile = this.createOutputFile(ARQUIVO_TREINO);
+			}
 			File testFile = null;
 			if (generateTestFile)
 			{
@@ -111,15 +116,18 @@ public class LACQueryFileConverter
 			}
 
 			// separa percentuais para treino e teste
-			final int percentualTreino = (generateTestFile ? 80 : 100);
+			final int percentualTreino = (generateTrainingFile ? (generateTestFile ? 80 : 100) : 0);
 			final int percentualTeste = 100 - percentualTreino;
 
-			int qtdeTreino = percentualTreino / 10;
+			int qtdeTreino = (percentualTreino > 0 ? (percentualTreino / 10) : 0);
 			int qtdeTeste = (percentualTeste > 0 ? (percentualTeste / 10) : 0);
 
 			if (qtdeTreino%2 == 0 && qtdeTeste%2 == 0)
 			{
-				qtdeTreino = qtdeTreino/2;
+				if (qtdeTreino > 0)
+				{
+					qtdeTreino = qtdeTreino/2;
+				}
 				if (qtdeTeste > 0)
 				{
 					qtdeTeste = qtdeTeste/2;
@@ -127,7 +135,10 @@ public class LACQueryFileConverter
 			}
 			else if (qtdeTreino%3 == 0 && qtdeTeste%3 == 0)
 			{
-				qtdeTreino = qtdeTreino/3;
+				if (qtdeTreino > 0)
+				{
+					qtdeTreino = qtdeTreino/3;
+				}
 				if (qtdeTeste > 0)
 				{
 					qtdeTeste = qtdeTeste/3;
@@ -145,14 +156,21 @@ public class LACQueryFileConverter
 			Iterator<String> iterator = queriesId.iterator();
 			while (iterator.hasNext())
 			{
-				boolean adicionarTreino = (qtdeTempSeparadaTreino < qtdeTreino);
+				boolean adicionarTreino = (generateTrainingFile && (qtdeTempSeparadaTreino < qtdeTreino));
 				boolean adicionarTeste = (!adicionarTreino && generateTestFile && (qtdeTempSeparadaTeste < qtdeTeste));
 
 				if (!adicionarTreino && !adicionarTeste)
 				{
 					qtdeTempSeparadaTreino = 0;
 					qtdeTempSeparadaTeste = 0;
-					adicionarTreino = true;
+					if (generateTrainingFile)
+					{
+						adicionarTreino = true;
+					}
+					else if (generateTestFile)
+					{
+						adicionarTeste = true;
+					}
 				}
 
 				String queryId = iterator.next();

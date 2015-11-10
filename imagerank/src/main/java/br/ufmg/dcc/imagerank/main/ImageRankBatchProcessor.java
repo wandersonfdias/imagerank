@@ -79,9 +79,10 @@ public class ImageRankBatchProcessor
 			 * 5. Gerar arquivo de treino no formato do LAC.
 			 */
 
-			String arquivoPares = diretorioBase + "/pares/" + ImageRankConstants.PAIR_OUTPUT_FILENAME;
-			String arquivoParesWeka = diretorioBase + "/pares/" + ImageRankConstants.WEKA_PAIR_OUTPUT_FILENAME;
-			String arquivoParesDiscretizados = diretorioBase + "/pares/" + ImageRankConstants.DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME;
+			// arquivos de pares
+			String arquivoPares = new StringBuilder(diretorioBase).append('/').append(diretorioPares).append('/').append(ImageRankConstants.PAIR_OUTPUT_FILENAME).toString();
+			String arquivoParesWeka = new StringBuilder(diretorioBase).append('/').append(diretorioPares).append('/').append(ImageRankConstants.WEKA_PAIR_OUTPUT_FILENAME).toString();
+			String arquivoParesDiscretizados = new StringBuilder(diretorioBase).append('/').append(diretorioPares).append('/').append(ImageRankConstants.DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME).toString();
 
 			// gera os pares aleatórios e normalizados
 			LOG.info("[GERAÇÃO ARQUIVO DE PARES] - INICIO");
@@ -93,7 +94,7 @@ public class ImageRankBatchProcessor
 				LOG.info("[CONVERSÃO ARQUIVO FORMATO WEKA] - INICIO");
 
 				// converte pares para o formato do weka
-				convertToWekaFile(arquivoParesDiscretizados, arquivoParesWeka);
+				convertToWekaFile(arquivoPares, arquivoParesWeka);
 
 				LOG.info("[CONVERSÃO ARQUIVO FORMATO WEKA] - FIM");
 			}
@@ -120,7 +121,7 @@ public class ImageRankBatchProcessor
 			LOG.info("[GERAÇÃO ARQUIVO TREINO FORMATO LAC] - INICIO");
 
 			LACQueryFileConverter converter = new LACQueryFileConverter(diretorioBase, diretorioLACDataset, arquivoParesDiscretizados, arquivoPares);
-			converter.convert(false);
+			converter.convert(true, false);
 
 			LOG.info("[GERAÇÃO ARQUIVO TREINO FORMATO LAC] - FIM");
 		}
