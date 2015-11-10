@@ -37,7 +37,7 @@ public class RandomPairGenerator
 	 * Teste
 	 * @param args
 	 */
-	public static void main(String[] args)
+	public static void main(String[] args) throws ProcessorException
 	{
 		LOG.info("Iniciando processamento...");
 
@@ -58,13 +58,13 @@ public class RandomPairGenerator
 		}
 		catch (ProcessorException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
+			throw e;
 		}
 		catch (IOException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
+			throw new ProcessorException(e.getMessage(), e);
 		}
 
 		LOG.info("Fim...");
