@@ -610,7 +610,7 @@ public class ExtratorPares
 			throw new ProcessorException(String.format("Não foi possível criar o diretório de saída '%s'.", path));
 		}
 
-		String arquivo = new StringBuilder(path).append(ImageRankConstants.ARQUIVO_SAIDA).toString();
+		String arquivo = new StringBuilder(path).append(ImageRankConstants.PAIR_OUTPUT_FILENAME).toString();
 		File file = new File(arquivo);
 		file.setWritable(true);
 		file.setReadable(true);

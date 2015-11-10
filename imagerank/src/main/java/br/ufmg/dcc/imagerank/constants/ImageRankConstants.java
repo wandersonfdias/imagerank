@@ -5,7 +5,7 @@ package br.ufmg.dcc.imagerank.constants;
  */
 public interface ImageRankConstants
 {
-	String ARQUIVO_SAIDA = "saida.txt";
+	String PAIR_OUTPUT_FILENAME = "pares.txt";
 	String FIELD_SEPARATOR = ",";
 	String LINE_SEPARATOR = "\n";
 	String FILENAME_SEPARATOR = ".";
