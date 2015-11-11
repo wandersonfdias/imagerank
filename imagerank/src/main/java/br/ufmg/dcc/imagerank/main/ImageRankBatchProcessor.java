@@ -66,7 +66,7 @@ public class ImageRankBatchProcessor
 				}
 				catch (Exception e)
 				{
-					throw new ProcessorException(String.format("Parâmetros totalParesGerar inválido. Favor informar um valor válido. Valor informado: '%s'.", args[5]));
+					throw new ProcessorException(String.format("Parâmetros totalParesGerar inválido. Favor informar um valor válido. Valor informado: '%s'.", args[6]));
 				}
 			}
 

@@ -23,57 +23,79 @@ public class ImageRankOnlineQueryProcessor
 {
 	private static final Log LOG = LogFactory.getLog(ImageRankOnlineQueryProcessor.class);
 
-	public static void main(String[] args)
+	/**
+	 * Exceuta os seguintes passos online:<br>
+	 * 1. Extrair descritores da imagem de consulta.<br>
+	 * 2. Gerar arquivo de pares de consulta, normalizado, com imagem de consulta + X imagens aleatórias para comparação.<br>
+	 * 3. Converter arquivo de pares de consulta para formato weka.<br>
+	 * 4. Discretizar arquivos de pares de consulta.<br>
+	 * 5. Gerar arquivo de teste no formato do LAC.<br>
+	 * 6. Rodar o algoritmo do LAC.<br>
+	 * 7. Gerar saída com top-K imagens similares (nome da imagem, score).<br>
+	 * @throws ProcessorException
+	 */
+	public static void main(String[] args) throws ProcessorException
 	{
 		try
 		{
-//			if (args == null || args.length < 5)
-//			{
-//				String parameters = "\n\tParâmetro 1: diretorioBase (Path raiz para o subdiretório de imagens. Ex: /opt/extrai_descritores)"
-//						+ "\n\tParâmetro 2: diretorioImagens (Nome do subdiretório de imagens. Ex: imagens)"
-//						+ "\n\tParâmetro 3: diretorioDescritores (Nome do subdiretório de descritores. Ex: descritores)"
-//						+ "\n\tParâmetro 4: diretorioPares (Nome do subdiretório para gravação do arquivos de pares. Ex: pares)"
-//						+ "\n\tParâmetro 5: diretorioLACDataset (Nome do subdiretório para gravação do arquivo de treino do LAC. Ex: lac_dataset)"
-//						+ "\n\tParâmetro 6: arquivoParesOriginal (Path completo para o arquivo de pares original. Ex: /opt/pares/arquivo-pares.dat)"
-//						+ "\n\tParâmetro 7 <opcional>: totalParesGerar (Total de pares para geração. Ex: 500000 - Default: 100000 )"
-//						+ "\n"
-//						;
-//				throw new ProcessorException("Parâmetros obrigatórios não informados." + parameters);
-//			}
-//
-//			// parâmetros de entrada
-//			String diretorioBase = args[0];
-//			String diretorioImagens = args[1];
-//			String diretorioDescritores = args[2];
-//			String diretorioPares = args[3];
-//			String diretorioLACDataset = args[4];
-//			String arquivoParesOriginal = args[5];
-//			int totalParesGerar = 0;
-//
-//			if (args.length >= 7)
-//			{
-//				try
-//				{
-//					totalParesGerar = new Integer(args[6]);
-//				}
-//				catch (Exception e)
-//				{
-//					throw new ProcessorException(String.format("Parâmetros totalParesGerar inválido. Favor informar um valor válido. Valor informado: '%s'.", args[5]));
-//				}
-//			}
+			// TODO Wanderson - adicionar parâmetro de imagem de consulta e validá-lo. Validar existência da imagem e copiá-la para o diretório de processamento da consulta (parametrizar esse diretório).
 
-			// parâmetros
-			String diretorioBaseCompleta = System.getenv("HOME") + "/extrai_descritores";
-			String diretorioBaseConsulta = System.getenv("HOME") + "/extrai_descritores/base_consulta";
-			String diretorioImagens = "imagens";
-			String diretorioDescritores = "descritores";
-			String diretorioPares = "pares";
-			String diretorioLACDataset = "lac_dataset";
-			String diretorioSaidaScore = "score_output";
-			String diretorioExecucaoLAC = System.getenv("HOME") + "/extrai_descritores/lac";
-			String diretorioSaidaLAC = System.getenv("HOME") +"/extrai_descritores/lac_output";
+			if (args == null || args.length < 10)
+			{
+				String parameters = "\n\tParâmetro 1: diretorioBaseCompleta (Path completo para o diretório da base de imagens completa. Ex: /imagerank/base_completa)"
+						+ "\n\tParâmetro 2: diretorioBaseConsulta (Path completo para o diretório da base de imagens de consulta. Ex: /imagerank/base_consulta)"
+						+ "\n\tParâmetro 3: diretorioImagens (Nome do subdiretório de imagens. Ex: imagens)"
+						+ "\n\tParâmetro 4: diretorioDescritores (Nome do subdiretório de descritores. Ex: descritores)"
+						+ "\n\tParâmetro 5: diretorioPares (Nome do subdiretório para gravação do arquivos de pares. Ex: pares)"
+						+ "\n\tParâmetro 6: diretorioLACDataset (Nome do subdiretório para gravação do arquivo de treino/teste do LAC. Ex: lac_dataset)"
+						+ "\n\tParâmetro 7: diretorioExecucaoLAC (Path completo para execução do LAC. Ex: /imagerank/bin/lac)"
+						+ "\n\tParâmetro 8: diretorioSaidaLAC (Path completo para gravação do arquivo de sáida do LAC. Ex: /imagerank/lac_output)"
+						+ "\n\tParâmetro 9: diretorioSaidaScore (Nome do subdiretório para gravação do arquivo de saída do score dentro do diretório da base de consulta. Ex: score_output)"
+						+ "\n\tParâmetro 10: totalParesGerar (Total de pares para geração. Ex: 500)"
+						+ "\n"
+						;
+				throw new ProcessorException("Parâmetros obrigatórios não informados." + parameters);
+			}
+
+			// parâmetros de entrada
+			String diretorioBaseCompleta = args[0];
+			String diretorioBaseConsulta = args[1];
+			String diretorioImagens = args[2];
+			String diretorioDescritores = args[3];
+			String diretorioPares = args[4];
+			String diretorioLACDataset = args[5];
+			String diretorioExecucaoLAC = args[6];
+			String diretorioSaidaLAC = args[7];
+			String diretorioSaidaScore = args[8];
 			int totalParesGerar = 500;
-			int topKImagesToReturn = 30; // TODO Implementar
+//			int topKImagesToReturn = 30; // TODO Wanderson - implementar
+
+			try
+			{
+				totalParesGerar = new Integer(args[9]);
+				if (totalParesGerar <= 0)
+				{
+					throw new IllegalArgumentException();
+				}
+			}
+			catch (Exception e)
+			{
+				throw new ProcessorException(String.format("Parâmetros totalParesGerar inválido. Favor informar um valor válido. Valor informado: '%s'.", args[9]));
+			}
+
+				// TODO Wanderson - implementar
+//				if (args.length >= 10)
+//				{
+//					try
+//					{
+//						topKImagesToReturn = new Integer(args[10]);
+//					}
+//					catch (Exception e)
+//					{
+//						throw new ProcessorException(String.format("Parâmetros topKImagesToReturn inválido. Favor informar um valor válido. Valor informado: '%s'.", args[10]));
+//					}
+//				}
+
 
 			/*
 			 * Passos Online:
@@ -91,7 +113,10 @@ public class ImageRankOnlineQueryProcessor
 			String arquivoParesWekaConsulta = new StringBuilder(diretorioBaseConsulta).append(File.separator).append(diretorioPares).append(File.separator).append(ImageRankConstants.WEKA_PAIR_OUTPUT_FILENAME).toString();
 			String arquivoParesDiscretizadosConsulta = new StringBuilder(diretorioBaseConsulta).append(File.separator).append(diretorioPares).append(File.separator).append(ImageRankConstants.DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME).toString();
 
-			// 1. Extrair descritores da imagem de consulta // TODO
+			// 1. Extrair descritores da imagem de consulta
+			LOG.info("[EXTRAÇÃO DESCRITORES BASE CONSULTA] - INICIO");
+			extractQueryImageDescriptors(diretorioBaseConsulta);
+			LOG.info("[EXTRAÇÃO DESCRITORES BASE CONSULTA] - FIM");
 
 			// gera os pares aleatórios e normalizados, considerando a imagem de consulta
 			LOG.info("[GERAÇÃO ARQUIVO DE PARES] - INICIO");
@@ -149,14 +174,31 @@ public class ImageRankOnlineQueryProcessor
 		}
 		catch (ProcessorException e)
 		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOG.error(e.getMessage(), e);
+			throw e;
 		}
 	}
 
-	private static void extractQueryImageDescriptors()
+	private static void extractQueryImageDescriptors(String diretorioBaseConsulta) throws ProcessorException
 	{
-		// TODO
+		String comando = "sh main.sh";
+		String[] parametros = null;
+		String diretorioSaidaProcessamento = new StringBuilder(diretorioBaseConsulta).append(File.separator).append("log").toString();
+		String arquivoSaidaProcessamento = "extracao_descritores.log";
+
+		ShellCommandRunner shell = new ShellCommandRunner(diretorioBaseConsulta, comando, parametros, diretorioSaidaProcessamento, arquivoSaidaProcessamento);
+		int status = shell.run();
+
+		if (status != 0)
+		{
+			String msgErro = StringUtils.EMPTY;
+			if (shell.getSaidaErro() != null && !shell.getSaidaErro().isEmpty())
+			{
+				msgErro = StringUtils.join(shell.getSaidaErro().toArray(), '\n').trim();
+			}
+
+			throw new ProcessorException(String.format("Ocorreu um erro inesperado na extração dos descritores da base de consulta.\nDETALHE: \"%s\".", msgErro));
+		}
 	}
 
 	private static void runLAC(String diretorioBaseCompleta, String diretorioBaseConsulta, String diretorioLACDataset, String diretorioExecucaoLAC, String diretorioSaidaLAC) throws ProcessorException
@@ -191,6 +233,7 @@ public class ImageRankOnlineQueryProcessor
 
 		ShellCommandRunner shell = new ShellCommandRunner(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
 		int status = shell.run();
+
 		if (status != 0)
 		{
 			String msgErro = StringUtils.EMPTY;
@@ -198,6 +241,7 @@ public class ImageRankOnlineQueryProcessor
 			{
 				msgErro = StringUtils.join(shell.getSaidaErro().toArray(), '\n').trim();
 			}
+
 			throw new ProcessorException(String.format("Ocorreu um erro inesperado na execução do LAC.\nDETALHE: \"%s\".", msgErro));
 		}
 	}
