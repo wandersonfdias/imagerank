@@ -10,7 +10,7 @@ diretorioLACDataset="lac_dataset"
 diretorioExecucaoLAC="$PWD/bin/lac"
 diretorioSaidaLAC="$diretorioBaseConsulta/lac_output"
 diretorioSaidaScore="score_output"
-totalParesGerar=500
+totalParesGerar=200
 
 java -Dfile.encoding=UTF-8 -cp imagerank-1.0.0-SNAPSHOT.jar br.ufmg.dcc.imagerank.main.ImageRankOnlineQueryProcessor $diretorioBaseCompleta $diretorioBaseConsulta $diretorioImagens $diretorioDescritores $diretorioPares $diretorioLACDataset $diretorioExecucaoLAC $diretorioSaidaLAC $diretorioSaidaScore $totalParesGerar 2&> $arquivoLog &
 
