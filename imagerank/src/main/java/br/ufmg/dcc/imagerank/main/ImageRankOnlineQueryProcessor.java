@@ -67,7 +67,7 @@ public class ImageRankOnlineQueryProcessor
 			String diretorioExecucaoLAC = args[6];
 			String diretorioSaidaLAC = args[7];
 			String diretorioSaidaScore = args[8];
-			int totalParesGerar = 500;
+			int totalParesGerar = 0;
 //			int topKImagesToReturn = 30; // TODO Wanderson - implementar
 
 			try
@@ -186,7 +186,7 @@ public class ImageRankOnlineQueryProcessor
 	 */
 	private static void extractQueryImageDescriptors(String diretorioBaseConsulta) throws ProcessorException
 	{
-		String comando = "sh main.sh";
+		String comando = "main.sh";
 		String[] parametros = null;
 		String diretorioSaidaProcessamento = new StringBuilder(diretorioBaseConsulta).append(File.separator).append("log").toString();
 		String arquivoSaidaProcessamento = "extracao_descritores.log";
