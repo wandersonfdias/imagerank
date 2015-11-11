@@ -179,6 +179,11 @@ public class ImageRankOnlineQueryProcessor
 		}
 	}
 
+	/**
+	 * Extrai descritores da imagem da base de consulta
+	 * @param diretorioBaseConsulta
+	 * @throws ProcessorException
+	 */
 	private static void extractQueryImageDescriptors(String diretorioBaseConsulta) throws ProcessorException
 	{
 		String comando = "sh main.sh";
@@ -201,6 +206,15 @@ public class ImageRankOnlineQueryProcessor
 		}
 	}
 
+	/**
+	 * Executa o algoritmo do LAC, considerando o dataset de treino da base completa e o dataset de teste da base de consulta
+	 * @param diretorioBaseCompleta
+	 * @param diretorioBaseConsulta
+	 * @param diretorioLACDataset
+	 * @param diretorioExecucaoLAC
+	 * @param diretorioSaidaLAC
+	 * @throws ProcessorException
+	 */
 	private static void runLAC(String diretorioBaseCompleta, String diretorioBaseConsulta, String diretorioLACDataset, String diretorioExecucaoLAC, String diretorioSaidaLAC) throws ProcessorException
 	{
 		String comando = "lazy";
