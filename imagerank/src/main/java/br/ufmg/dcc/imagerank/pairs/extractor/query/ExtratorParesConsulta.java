@@ -266,6 +266,9 @@ public class ExtratorParesConsulta
 		while(!poolThread.isTerminated());
 		System.out.println("Pares processados: " + contador + " - " + tempo + "s");
 
+		// limpa cache do processamento de imagens
+		ProcessadorParImagemConsulta.clearCache();
+
 		if (errosProcessamento.size() > 0)
 		{
 			LOG.error("Processamento Cancelado!!! Vide erros abaixo:");

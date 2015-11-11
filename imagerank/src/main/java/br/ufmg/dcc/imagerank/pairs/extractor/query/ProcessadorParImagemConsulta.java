@@ -64,6 +64,14 @@ public class ProcessadorParImagemConsulta
 	}
 
 	/**
+	 * Limpa cache de processamento
+	 */
+	public static void clearCache()
+	{
+		cacheDescritoresImagemConsulta = new HashMap<String, String[]>();
+	}
+
+	/**
 	 * Realiza o processamento de uma imagem
 	 * @return
 	 * @throws ImageProcessorException
