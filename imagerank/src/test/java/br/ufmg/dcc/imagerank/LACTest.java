@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import br.ufmg.dcc.imagerank.constants.ImageRankConstants;
 import br.ufmg.dcc.imagerank.exception.ProcessorException;
-import br.ufmg.dcc.imagerank.shell.util.ShellCommandRunner;
+import br.ufmg.dcc.imagerank.shell.util.ShellCommandExecutor;
 
 /**
  * @author Wanderson Ferreira Dias - <code>wandersonf.dias@gmail.com</code>
@@ -53,8 +53,8 @@ public class LACTest
 							  , "10000000" // valor
 							  };
 
-		ShellCommandRunner shell = new ShellCommandRunner(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
-		int status = shell.run();
+		ShellCommandExecutor shell = new ShellCommandExecutor(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
+		int status = shell.execute();
 		if (status != 0)
 		{
 			String msgErro = StringUtils.EMPTY;

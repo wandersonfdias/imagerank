@@ -12,7 +12,7 @@ import br.ufmg.dcc.imagerank.exception.ProcessorException;
 import br.ufmg.dcc.imagerank.lac.converter.LACQueryFileConverter;
 import br.ufmg.dcc.imagerank.lac.converter.LACScoreOutputFileConverter;
 import br.ufmg.dcc.imagerank.pairs.extractor.query.ExtratorParesConsulta;
-import br.ufmg.dcc.imagerank.shell.util.ShellCommandRunner;
+import br.ufmg.dcc.imagerank.shell.util.ShellCommandExecutor;
 import br.ufmg.dcc.imagerank.weka.util.DiscretizeDataSet;
 import br.ufmg.dcc.imagerank.weka.util.WekaConversor;
 
@@ -191,8 +191,8 @@ public class ImageRankOnlineQueryProcessor
 		String diretorioSaidaProcessamento = new StringBuilder(diretorioBaseConsulta).append(File.separator).append("log").toString();
 		String arquivoSaidaProcessamento = "extracao_descritores.log";
 
-		ShellCommandRunner shell = new ShellCommandRunner(diretorioBaseConsulta, comando, parametros, diretorioSaidaProcessamento, arquivoSaidaProcessamento);
-		int status = shell.run();
+		ShellCommandExecutor shell = new ShellCommandExecutor(diretorioBaseConsulta, comando, parametros, diretorioSaidaProcessamento, arquivoSaidaProcessamento);
+		int status = shell.execute();
 
 		if (status != 0)
 		{
@@ -245,8 +245,8 @@ public class ImageRankOnlineQueryProcessor
 							  , "10000000" // valor
 							  };
 
-		ShellCommandRunner shell = new ShellCommandRunner(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
-		int status = shell.run();
+		ShellCommandExecutor shell = new ShellCommandExecutor(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
+		int status = shell.execute();
 
 		if (status != 0)
 		{

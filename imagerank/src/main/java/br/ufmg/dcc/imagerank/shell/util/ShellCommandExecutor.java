@@ -21,9 +21,9 @@ import br.ufmg.dcc.imagerank.exception.ProcessorException;
  * Abstrai a execução de comandos no sistema operacional
  * @author Wanderson Ferreira Dias - <code>wandersonf.dias@gmail.com</code>
  */
-public class ShellCommandRunner
+public class ShellCommandExecutor
 {
-	private static final Log LOG = LogFactory.getLog(ShellCommandRunner.class);
+	private static final Log LOG = LogFactory.getLog(ShellCommandExecutor.class);
 
 	// parâmetros de entrada
 	private String diretorioExecucao;
@@ -45,7 +45,7 @@ public class ShellCommandRunner
 	 * @param parametros
 	 * @param arquivoSaidaProcessamento
 	 */
-	public ShellCommandRunner(String diretorioExecucao, String comando, String[] parametros, String diretorioSaidaProcessamento, String arquivoSaidaProcessamento)
+	public ShellCommandExecutor(String diretorioExecucao, String comando, String[] parametros, String diretorioSaidaProcessamento, String arquivoSaidaProcessamento)
 	{
 		this.diretorioExecucao = diretorioExecucao;
 		this.comando = comando;
@@ -59,7 +59,7 @@ public class ShellCommandRunner
 	 * @return Status da execução do programa
 	 * @throws ProcessorException
 	 */
-	public int run() throws ProcessorException
+	public int execute() throws ProcessorException
 	{
 		int statusSaida = -1;
 		Process process = null;
