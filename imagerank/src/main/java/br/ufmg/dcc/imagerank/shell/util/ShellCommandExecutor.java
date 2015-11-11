@@ -36,8 +36,6 @@ public class ShellCommandExecutor
 	private List<String> saidaPadrao;
 	private List<String> saidaErro;
 
-
-
 	/**
 	 * Construtor
 	 * @param diretorioExecucao

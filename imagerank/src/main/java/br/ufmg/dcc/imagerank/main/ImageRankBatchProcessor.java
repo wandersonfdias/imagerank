@@ -23,7 +23,7 @@ public class ImageRankBatchProcessor
 	/**
 	 * Realiza geração da base de treino para processamento de imagens.<br><br>
 	 * Passos do processamento:<br>
-	 * 1. Extrair descritores da imagem de consulta.<br>
+	 * 1. Extrair descritores das imagens.<br>
 	 * 2. Gerar arquivos de pares aleatórios e normalizados.<br>
 	 * 3. Converter arquivo de pares para formato weka.<br>
 	 * 4. Discretizar arquivos de pares.<br>
