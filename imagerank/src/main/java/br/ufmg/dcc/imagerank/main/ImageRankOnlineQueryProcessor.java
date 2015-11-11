@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import br.ufmg.dcc.imagerank.constants.ImageRankConstants;
 import br.ufmg.dcc.imagerank.exception.ProcessorException;
 import br.ufmg.dcc.imagerank.lac.converter.LACQueryFileConverter;
+import br.ufmg.dcc.imagerank.lac.converter.LACScoreOutputFileConverter;
 import br.ufmg.dcc.imagerank.pairs.extractor.query.ExtratorParesConsulta;
 import br.ufmg.dcc.imagerank.weka.util.DiscretizeDataSet;
 import br.ufmg.dcc.imagerank.weka.util.WekaConversor;
@@ -65,7 +66,9 @@ public class ImageRankOnlineQueryProcessor
 			String diretorioDescritores = "descritores";
 			String diretorioPares = "pares";
 			String diretorioLACDataset = "lac_dataset";
+			String diretorioSaidaScore = "score_output";
 			int totalParesGerar = 500;
+			int topKImagesToReturn = 30; // TODO Implementar
 
 			/*
 			 * Passos Online:
@@ -127,9 +130,17 @@ public class ImageRankOnlineQueryProcessor
 
 			LOG.info("[GERAÇÃO ARQUIVO TREINO FORMATO LAC] - FIM");
 
+			// Executa o algoritmo do LAC
+			String diretorioSaidaLAC = "lac_output";
+			String arquivoSaidaProcessamentoLAC = null;
 
-			// 6. Rodar o algoritmo do LAC. // TODO
-			// 7. Gerar saída com top-K imagens similares (nome da imagem, score). // TODO
+			// Gera saída com top-K imagens similares (nome da imagem, score)
+			LOG.info("[GERAÇÃO ARQUIVO DE SAÍDA COM SCORE] - INICIO");
+
+			LACScoreOutputFileConverter scoreConverter = new LACScoreOutputFileConverter(diretorioBaseConsulta, diretorioSaidaScore, arquivoSaidaProcessamentoLAC);
+			scoreConverter.convert();
+
+			LOG.info("[GERAÇÃO ARQUIVO DE SAÍDA COM SCORE] - FIM");
 		}
 		catch (ProcessorException e)
 		{

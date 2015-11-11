@@ -345,7 +345,6 @@ public class ExtratorPares
 
 					List<String> data = new ArrayList<String>();
 					data.add(line.toString());
-//					FileUtils.writeLines(arquivoSaida, data, ImageRankConstants.LINE_SEPARATOR, true);
 					IOUtils.writeLines(data, ImageRankConstants.LINE_SEPARATOR, buffer, Charsets.UTF_8);
 					buffer.flush();
 				}

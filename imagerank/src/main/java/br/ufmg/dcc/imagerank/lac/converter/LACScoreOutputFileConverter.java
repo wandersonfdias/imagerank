@@ -1,7 +1,9 @@
 package br.ufmg.dcc.imagerank.lac.converter;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,6 +11,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,19 +45,17 @@ public class LACScoreOutputFileConverter
 	private String diretorioBase;
 
 	/**
-	 * Arquivo de saída para gravação da imagem comparada e score em relação à imagem de consulta
-	 */
-	private String arquivoSaidaScore;
-
-	/**
 	 * Construtor
+	 * @param diretorioBase
+	 * @param diretorioSaida
+	 * @param arquivoSaidaProcessamentoLAC
+	 * @param arquivoSaidaScore
 	 */
-	public LACScoreOutputFileConverter(String diretorioBase, String diretorioSaida, String arquivoSaidaProcessamentoLAC, String arquivoSaidaScore)
+	public LACScoreOutputFileConverter(String diretorioBase, String diretorioSaida, String arquivoSaidaProcessamentoLAC)
 	{
 		this.diretorioBase = diretorioBase;
 		this.diretorioSaida = diretorioSaida;
 		this.arquivoSaidaProcessamentoLAC = arquivoSaidaProcessamentoLAC;
-		this.arquivoSaidaScore = arquivoSaidaScore;
 	}
 
 	/**
@@ -145,12 +146,8 @@ public class LACScoreOutputFileConverter
 			});
 			Collections.sort(scores, comparator);
 
-			// cria o arquivo de saída
-			File file = this.createOutputFile(this.getScoreFileName());
-
-			// grava linhas no arquivo de saída
-			String headerLine = "imagem_comparacao;score";
-			this.writeLine(file, headerLine);
+			// grava arquivo de saída contendo os scores
+			this.writeOutputFile(scores);
 		}
 		catch (IOException e)
 		{
@@ -164,11 +161,52 @@ public class LACScoreOutputFileConverter
 		}
 	}
 
-	private void writeLine(File file, String line) throws IOException
+	/**
+	 * Grava arquivo de saída
+	 * @param scores
+	 * @throws ProcessorException
+	 */
+	private void writeOutputFile(List<ImagemComparacaoDTO> scores) throws ProcessorException
 	{
-		List<String> data = new ArrayList<String>();
-		data.add(line);
-		FileUtils.writeLines(file, data, ImageRankConstants.LINE_SEPARATOR, true);
+		FileOutputStream out = null;
+
+		try
+		{
+			final char fieldSeparator = ';';
+
+			// cria o arquivo de saída
+			File file = this.createOutputFile(ImageRankConstants.SCORE_OUTPUT_FILENAME);
+			out = FileUtils.openOutputStream(file, true);
+			final BufferedOutputStream buffer = new BufferedOutputStream(out);
+
+			// grava o cabeçalho do arquivo
+			String headerLine = new StringBuilder().append("imagem_comparacao").append(fieldSeparator).append("score").toString();
+			List<String> headerdata = new ArrayList<String>();
+			headerdata.add(headerLine);
+			IOUtils.writeLines(headerdata, ImageRankConstants.LINE_SEPARATOR, buffer, Charsets.UTF_8);
+			buffer.flush();
+
+			for (ImagemComparacaoDTO dto : scores)
+			{
+				// grava a linha do score no arquivo de saída
+				String line = new StringBuilder().append(dto.getImagem()).append(fieldSeparator).append(dto.getScore()).toString();
+				List<String> lineData = new ArrayList<String>();
+				lineData.add(line);
+				IOUtils.writeLines(lineData, ImageRankConstants.LINE_SEPARATOR, buffer, Charsets.UTF_8);
+				buffer.flush();
+			}
+
+			buffer.flush();
+			out.close();
+		}
+		catch (IOException e)
+		{
+			throw new ProcessorException(String.format("Ocorreu um erro ao gravar linha no arquivo de saída '%s' no diretório '%s'.", ImageRankConstants.SCORE_OUTPUT_FILENAME, this.getFullPathSaida()), e);
+		}
+		finally
+		{
+			IOUtils.closeQuietly(out);
+		}
 	}
 
 	private void createOutputDir() throws ProcessorException
@@ -225,18 +263,6 @@ public class LACScoreOutputFileConverter
 		}
 
 		return file;
-	}
-
-	private String getScoreFileName()
-	{
-		String[] data = StringUtils.split(this.arquivoSaidaProcessamentoLAC, '/');
-
-		StringBuilder sb = new StringBuilder();
-		sb.append(this.arquivoSaidaScore);
-		sb.append('_');
-		String name = data[data.length-1];
-		sb.append(name.substring(0, name.indexOf('.')));
-		return sb.toString();
 	}
 
 	/**
