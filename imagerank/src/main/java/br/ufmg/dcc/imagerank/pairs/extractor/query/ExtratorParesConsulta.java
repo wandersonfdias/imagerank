@@ -480,13 +480,13 @@ public class ExtratorParesConsulta
 	{
 		try
 		{
-			String fullPathImagem = this.getFullPathBaseCompleta(this.diretorioBaseCompleta);
+			String fullPathImagem = this.getFullPathBaseCompleta(this.diretorioImagens);
 			Collection<File> files = FileUtils.listFiles(new File(fullPathImagem), new String[]{ImageRankConstants.JPEG_IMAGE_EXTENSION}, true);
 			return ((files != null && !files.isEmpty()) ? new LinkedList<File>(files) : null); // mantém a ordem da lista
 		}
 		catch (IllegalArgumentException e)
 		{
-			throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento.", e);
+			throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento na base completa.", e);
 		}
 	}
 
@@ -499,14 +499,14 @@ public class ExtratorParesConsulta
 	{
 		try
 		{
-			String fullPathImagem = this.getFullPathBaseConsulta(this.diretorioBaseConsulta);
+			String fullPathImagem = this.getFullPathBaseConsulta(this.diretorioImagens);
 			Collection<File> files = FileUtils.listFiles(new File(fullPathImagem), new String[]{ImageRankConstants.JPEG_IMAGE_EXTENSION}, true);
 
 			return ((files != null && !files.isEmpty()) ? new ArrayList<File>(files).get(0) : null);
 		}
 		catch (IllegalArgumentException e)
 		{
-			throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento.", e);
+			throw new ImagesNotFoundException("Não foi encontrado nenhuma imagem para processamento na base de consulta.", e);
 		}
 	}
 
@@ -542,7 +542,7 @@ public class ExtratorParesConsulta
 		}
 		catch (IllegalArgumentException e)
 		{
-			throw new DescriptorsNotFoundException("Não foi encontrado nenhum descritor de imagens.", e);
+			throw new DescriptorsNotFoundException(String.format("Não foi encontrado nenhum descritor de imagens no diretório '%s'.", fullPathDescriptors), e);
 		}
 	}
 
