@@ -4,6 +4,8 @@ import java.io.File;
 
 import org.apache.commons.lang3.StringUtils;
 
+import br.ufmg.dcc.imagerank.constants.ImageRankConstants;
+
 /**
  * @author Wanderson Ferreira Dias - <code>wandersonf.dias@gmail.com</code>
  */
@@ -54,5 +56,22 @@ public final class ImageRankUtils
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Verifica se o arquivo é uma imagem válida
+	 * @param file
+	 * @return
+	 */
+	public static boolean isValidImage(File file)
+	{
+		boolean image = false;
+
+		if (file != null && file.isFile() && file.exists() && file.getName().endsWith(ImageRankConstants.JPEG_IMAGE_EXTENSION))
+		{
+			image = true;
+		}
+
+		return image;
 	}
 }

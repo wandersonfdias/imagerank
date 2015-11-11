@@ -1,7 +1,9 @@
 package br.ufmg.dcc.imagerank.main;
 
+import java.io.File;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -10,6 +12,7 @@ import br.ufmg.dcc.imagerank.exception.ProcessorException;
 import br.ufmg.dcc.imagerank.lac.converter.LACQueryFileConverter;
 import br.ufmg.dcc.imagerank.lac.converter.LACScoreOutputFileConverter;
 import br.ufmg.dcc.imagerank.pairs.extractor.query.ExtratorParesConsulta;
+import br.ufmg.dcc.imagerank.shell.util.ShellCommandRunner;
 import br.ufmg.dcc.imagerank.weka.util.DiscretizeDataSet;
 import br.ufmg.dcc.imagerank.weka.util.WekaConversor;
 
@@ -61,12 +64,14 @@ public class ImageRankOnlineQueryProcessor
 
 			// parâmetros
 			String diretorioBaseCompleta = System.getenv("HOME") + "/extrai_descritores";
-			String diretorioBaseConsulta = System.getenv("HOME") + "/base_consulta";
+			String diretorioBaseConsulta = System.getenv("HOME") + "/extrai_descritores/base_consulta";
 			String diretorioImagens = "imagens";
 			String diretorioDescritores = "descritores";
 			String diretorioPares = "pares";
 			String diretorioLACDataset = "lac_dataset";
 			String diretorioSaidaScore = "score_output";
+			String diretorioExecucaoLAC = System.getenv("HOME") + "/extrai_descritores/lac";
+			String diretorioSaidaLAC = System.getenv("HOME") +"/extrai_descritores/lac_output";
 			int totalParesGerar = 500;
 			int topKImagesToReturn = 30; // TODO Implementar
 
@@ -82,9 +87,9 @@ public class ImageRankOnlineQueryProcessor
 			 */
 
 			// arquivos de pares de consulta
-			String arquivoParesConsulta = new StringBuilder(diretorioBaseConsulta).append('/').append(diretorioPares).append('/').append(ImageRankConstants.PAIR_OUTPUT_FILENAME).toString();
-			String arquivoParesWekaConsulta = new StringBuilder(diretorioBaseConsulta).append('/').append(diretorioPares).append('/').append(ImageRankConstants.WEKA_PAIR_OUTPUT_FILENAME).toString();
-			String arquivoParesDiscretizadosConsulta = new StringBuilder(diretorioBaseConsulta).append('/').append(diretorioPares).append('/').append(ImageRankConstants.DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME).toString();
+			String arquivoParesConsulta = new StringBuilder(diretorioBaseConsulta).append(File.separator).append(diretorioPares).append(File.separator).append(ImageRankConstants.PAIR_OUTPUT_FILENAME).toString();
+			String arquivoParesWekaConsulta = new StringBuilder(diretorioBaseConsulta).append(File.separator).append(diretorioPares).append(File.separator).append(ImageRankConstants.WEKA_PAIR_OUTPUT_FILENAME).toString();
+			String arquivoParesDiscretizadosConsulta = new StringBuilder(diretorioBaseConsulta).append(File.separator).append(diretorioPares).append(File.separator).append(ImageRankConstants.DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME).toString();
 
 			// 1. Extrair descritores da imagem de consulta // TODO
 
@@ -131,8 +136,8 @@ public class ImageRankOnlineQueryProcessor
 			LOG.info("[GERAÇÃO ARQUIVO TREINO FORMATO LAC] - FIM");
 
 			// Executa o algoritmo do LAC
-			String diretorioSaidaLAC = "lac_output";
-			String arquivoSaidaProcessamentoLAC = null;
+			String arquivoSaidaProcessamentoLAC = new StringBuilder(diretorioSaidaLAC).append(File.separator).append(ImageRankConstants.LAC_OUTPUT_FILENAME).toString();
+			runLAC(diretorioBaseCompleta, diretorioBaseConsulta, diretorioLACDataset, diretorioExecucaoLAC, diretorioSaidaLAC);
 
 			// Gera saída com top-K imagens similares (nome da imagem, score)
 			LOG.info("[GERAÇÃO ARQUIVO DE SAÍDA COM SCORE] - INICIO");
@@ -152,6 +157,49 @@ public class ImageRankOnlineQueryProcessor
 	private static void extractQueryImageDescriptors()
 	{
 		// TODO
+	}
+
+	private static void runLAC(String diretorioBaseCompleta, String diretorioBaseConsulta, String diretorioLACDataset, String diretorioExecucaoLAC, String diretorioSaidaLAC) throws ProcessorException
+	{
+		String comando = "lazy";
+		String dataSetTreino = new StringBuilder(diretorioBaseCompleta).append(File.separator).append(diretorioLACDataset).append(File.separator).append(ImageRankConstants.LAC_TRAINING_FILENAME).toString();
+		String dataSetTeste = new StringBuilder(diretorioBaseConsulta).append(File.separator).append(diretorioLACDataset).append(File.separator).append(ImageRankConstants.LAC_TEST_FILENAME).toString();
+
+		String[] parametros = { "-i" // dataset de treino
+							  , dataSetTreino
+
+							  // dataset de teste
+							  , "-t"
+							  , dataSetTeste
+
+							  // suporte mínimo
+							  , "-s" // parâmetro
+							  , "1" // valor
+
+							  // confiança mínima
+							  , "-c" // parâmetro
+							  , "0.01" // valor
+
+							  // quantidade máxima de regras a serem geradas
+							  , "-m" // parâmetro
+							  , "2" // valor
+
+							  // cache
+							  , "-e" // parâmetro
+							  , "10000000" // valor
+							  };
+
+		ShellCommandRunner shell = new ShellCommandRunner(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
+		int status = shell.run();
+		if (status != 0)
+		{
+			String msgErro = StringUtils.EMPTY;
+			if (shell.getSaidaErro() != null && !shell.getSaidaErro().isEmpty())
+			{
+				msgErro = StringUtils.join(shell.getSaidaErro().toArray(), '\n').trim();
+			}
+			throw new ProcessorException(String.format("Ocorreu um erro inesperado na execução do LAC.\nDETALHE: \"%s\".", msgErro));
+		}
 	}
 
 	/**

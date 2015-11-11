@@ -35,8 +35,6 @@ public class LACQueryFileConverter
 
 	private static final String FIELD_SEPARATOR = " ";
 	private static final int IMAGE_PAIR_ID_ATTRIBUTE = 0;
-	private static final String ARQUIVO_TREINO = "treino";
-	private static final String ARQUIVO_TESTE = "teste";
 
 	private String arquivoWeka;
 
@@ -107,12 +105,12 @@ public class LACQueryFileConverter
 			File trainingFile = null;
 			if (generateTrainingFile)
 			{
-				trainingFile = this.createOutputFile(ARQUIVO_TREINO);
+				trainingFile = this.createOutputFile(ImageRankConstants.LAC_TRAINING_FILENAME);
 			}
 			File testFile = null;
 			if (generateTestFile)
 			{
-				testFile = this.createOutputFile(ARQUIVO_TESTE);
+				testFile = this.createOutputFile(ImageRankConstants.LAC_TEST_FILENAME);
 			}
 
 			// separa percentuais para treino e teste

@@ -8,6 +8,9 @@ public interface ImageRankConstants
 	String PAIR_OUTPUT_FILENAME = "pares.txt";
 	String WEKA_PAIR_OUTPUT_FILENAME = "pares.arff";
 	String DISCRETIZED_WEKA_PAIR_OUTPUT_FILENAME = "pares_discretizados.arff";
+	String LAC_OUTPUT_FILENAME = "lac_result.txt";
+	String LAC_TRAINING_FILENAME = "treino.txt";
+	String LAC_TEST_FILENAME = "teste.txt";
 	String SCORE_OUTPUT_FILENAME = "score.txt";
 
 	String FIELD_SEPARATOR = ",";

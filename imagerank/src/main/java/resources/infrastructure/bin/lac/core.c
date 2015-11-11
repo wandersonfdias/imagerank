@@ -39,7 +39,7 @@ void print_statistics(int n_tests, int true_label, char* id, prediction_t predic
 	printf(" rules= %d avg_size= %f pred= %d true= %d ", N_RULES, avg_size, prediction.label, true_label);
 	for(int i=0;i<MAX_CLASSES;i++) {
 		printf("Score[%d]= %f ", i, prediction.score.points[i]);
-		// TODO - Wanderson
+		
 		//printf("%d %f ", prediction.score.ordered_labels[i], prediction.score.points[prediction.score.ordered_labels[i]]);
 	}
 	printf("Cache= %f\n", CACHE.content.size()/(float)CACHE.max_size);
@@ -71,11 +71,11 @@ prediction_t get_THE_prediction(int* instance, int instance_size, int true_label
 		if(RELATIVE) min_count=(int)(MIN_SUPP*projection_size);
 		induce_rules(items, n_items, count_target, size, projection_size, min_count, relevant_classes);
 
-// TODO - Wanderson
-for(int i=0;i<N_RULES;i++) {
-	print_rule(RULES[i]);
-	printf("\n");
-}
+
+//for(int i=0;i<N_RULES;i++) {
+//	print_rule(RULES[i]);
+//	printf("\n");
+//}
 
 		n_rules[0]=n_rules[1];
 		n_rules[1]=N_RULES;
