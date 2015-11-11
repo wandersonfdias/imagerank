@@ -161,8 +161,12 @@ public class ImageRankOnlineQueryProcessor
 			LOG.info("[GERAÇÃO ARQUIVO TREINO FORMATO LAC] - FIM");
 
 			// Executa o algoritmo do LAC
+			LOG.info("[EXECUTANDO ALGORITMO LAC] - INICIO");
+
 			String arquivoSaidaProcessamentoLAC = new StringBuilder(diretorioSaidaLAC).append(File.separator).append(ImageRankConstants.LAC_OUTPUT_FILENAME).toString();
 			runLAC(diretorioBaseCompleta, diretorioBaseConsulta, diretorioLACDataset, diretorioExecucaoLAC, diretorioSaidaLAC);
+
+			LOG.info("[EXECUTANDO ALGORITMO LAC] - FIM");
 
 			// Gera saída com top-K imagens similares (nome da imagem, score)
 			LOG.info("[GERAÇÃO ARQUIVO DE SAÍDA COM SCORE] - INICIO");
