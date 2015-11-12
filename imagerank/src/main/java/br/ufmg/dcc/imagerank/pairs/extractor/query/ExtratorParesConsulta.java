@@ -195,7 +195,10 @@ public class ExtratorParesConsulta
 			Integer randomNextUniqueImage = this.getRandomNextUniqueImage(imagensBaseCompleta.size());
 
 			File imagemComparacao = imagensBaseCompleta.get(randomNextUniqueImage);
-			pares.add(new ParDTO(imagemConsulta, imagemComparacao, 0)); // gera sempre com classe 0
+			if (!imagemConsulta.getName().equalsIgnoreCase(imagemComparacao.getName())) // garante que a imagem de consulta não seja par com ela própria
+			{
+				pares.add(new ParDTO(imagemConsulta, imagemComparacao, 0)); // gera sempre com classe 0
+			}
 		}
 		while (pares.size() < this.totalParesGerar);
 
