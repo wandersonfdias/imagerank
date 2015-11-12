@@ -22,6 +22,8 @@ int read_training_set(char* training) {
 		exit(-1);
 	}
 	free(training);
+
+	/** // TODO Wanderson - comentado por nao estar sendo utilizado
 	int n_lines=0;
 	char done[10];
 	while(1) {
@@ -31,6 +33,8 @@ int read_training_set(char* training) {
 		n_lines++;
 	}
 	rewind(file);
+	*/
+
 	for(int i=0;i<MAX_CLASSES;i++) {
 		sprintf(target_name[i], "CLASS=%d", i);
 		CLASS_NAME[target_name[i]]=i;
@@ -47,6 +51,7 @@ int read_training_set(char* training) {
 		ITEM_MAP[target_name[i]]=N_ITEMSETS;
 		++N_ITEMSETS;
 	}
+
 	while(1) {
 		int attr_type=CLASS;
 		char line[200*KB];
