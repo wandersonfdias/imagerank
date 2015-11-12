@@ -10,6 +10,7 @@ GIVEN SOME ITEMS, PROJECTS THE ORIGINAL TRAINING DATA TO THE INSTANCES CONTAININ
 */
 int project_training(int* items, int n_items, int* n_transactions, int* n_classes, set<int>& relevant_classes) {
    __START_TIMER__
+   /** ATENCAO: ESSE BLOCO ESTA COMENTADO PARA O SOFTWARE. ELE GERA ESTATISTICAS PARA PAPER....
    relevant_classes.clear();
    short* temp=(short*)malloc(sizeof(short)*(N_TRANSACTIONS+1));
    for(int i=0;i<N_TRANSACTIONS+1;i++) temp[i]=0;
@@ -31,6 +32,7 @@ int project_training(int* items, int n_items, int* n_transactions, int* n_classe
    }
    (*n_classes)=relevant_classes.size();
    free(temp);
+   */
    __FINISH_TIMER__
    return(0);
 }
