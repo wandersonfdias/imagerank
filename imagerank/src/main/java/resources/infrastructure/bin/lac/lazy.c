@@ -30,7 +30,7 @@ using namespace std;
 cache_t CACHE;
 itemset_t ITEMSETS[MAX_ITEMS];
 rule_t RULES[MAX_RULES];
-int META_LEARNING=0, RELATIVE=0, N_RULES=0, N_TESTS=0, N_POINTS=0, N_TRANSACTIONS=0, N_ITEMSETS=0, COUNT_TARGET[MAX_CLASSES], TARGET_ID[MAX_CLASSES], MIN_SIZE=1, MAX_SIZE=MAX_RULE_SIZE, MIN_RULES=1, MAX_JUDGEMENTS=1;
+int META_LEARNING=0, RELATIVE=0, N_RULES=0, N_TESTS=0, N_POINTS=0, N_TRANSACTIONS=0, N_ITEMSETS=0, COUNT_TARGET[MAX_CLASSES], TARGET_ID[MAX_CLASSES], MIN_SIZE=1, MAX_SIZE=MAX_RULE_SIZE, MIN_RULES=1, MAX_JUDGEMENTS=1, CACHE_TRAINING_DATA=0, ONLY_PROCESS_TRAINING=0;
 int MIN_COUNT=1;
 float MIN_CONF=0.001, MIN_LEVEL=0.5, MIN_SUPP=0.01, FACTOR=1.00, COSTS[MAX_CLASSES];
 char *DELIM=" ";
@@ -48,19 +48,23 @@ int classify(char* training, char* test, char* unlabeled, char* costs, int mode)
 	__START_TIMER__
 	read_costs(costs);
 	read_training_set(training);
-	read_test_set(test);
-	if(mode==LAZY_SUPERVISED_CLASSIFICATION) lazy_supervised_classification();
-	else if(mode==LAZY_SEMISUPERVISED_CLASSIFICATION) {
-		read_unlabeled_set(unlabeled);
-		lazy_semisupervised_classification();
-		lazy_supervised_classification();
+
+	if (ONLY_PROCESS_TRAINING==0) {
+		read_test_set(test);
+		if(mode==LAZY_SUPERVISED_CLASSIFICATION) lazy_supervised_classification();
+		else if(mode==LAZY_SEMISUPERVISED_CLASSIFICATION) {
+			read_unlabeled_set(unlabeled);
+			lazy_semisupervised_classification();
+			lazy_supervised_classification();
+		}
+		else if(mode==LAZY_TRANSDUCTIVE_CLASSIFICATION) lazy_transductive_classification();
+		else if(mode==LAZY_ACTIVE_CLASSIFICATION) lazy_active_classification();
+		for(int i=0;i<N_ITEMSETS;i++) {
+			free(ITEMSETS[i].layout);
+			free(ITEMSETS[i].list);
+		}
 	}
-	else if(mode==LAZY_TRANSDUCTIVE_CLASSIFICATION) lazy_transductive_classification();
-	else if(mode==LAZY_ACTIVE_CLASSIFICATION) lazy_active_classification();
-	for(int i=0;i<N_ITEMSETS;i++) {
-		free(ITEMSETS[i].layout);
-		free(ITEMSETS[i].list);
-	}
+
 	__FINISH_TIMER__
 	return(0);
 }
@@ -73,7 +77,7 @@ int main(int argc, char** argv) {
 	CACHE.factor=0.1;
 	CACHE.locked=0;
 	for(int i=0;i<MAX_CLASSES;i++) COSTS[i]=1;
-	while((c=getopt(argc,argv,"k:q:f:i:l:g:j:p:a:c:d:s:x:u:t:n:m:e:h"))!=-1) {
+	while((c=getopt(argc,argv,"k:q:f:i:l:g:j:p:a:c:d:s:x:u:t:n:m:e:h:z:w:w"))!=-1) {
 		switch(c) {
 			case 'i': file_in=strdup(optarg);
 				  break;
@@ -109,6 +113,14 @@ int main(int argc, char** argv) {
 			case 'f': FACTOR=atof(optarg);
 				  break;
 			case 'k': DELIM=strdup(optarg);
+				  break;
+			case 'w': CACHE_TRAINING_DATA=atoi(optarg);
+				  if (CACHE_TRAINING_DATA<0) CACHE_TRAINING_DATA=0;
+				  else if (CACHE_TRAINING_DATA>1) CACHE_TRAINING_DATA=1;
+				  break;
+			case 'z': ONLY_PROCESS_TRAINING=atoi(optarg);
+				  if (ONLY_PROCESS_TRAINING<0) ONLY_PROCESS_TRAINING=0;
+				  else if (ONLY_PROCESS_TRAINING>1) ONLY_PROCESS_TRAINING=1;
 				  break;
 			default:  exit(1);
 		}

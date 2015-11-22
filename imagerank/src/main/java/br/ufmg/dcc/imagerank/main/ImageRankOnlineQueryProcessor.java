@@ -247,6 +247,10 @@ public class ImageRankOnlineQueryProcessor
 							  // cache
 							  , "-e" // parâmetro
 							  , "10000000" // valor
+
+							  // cache do dataset de treino
+							  , "-w" // parâmetro
+							  , "1" // valor
 							  };
 
 		ShellCommandExecutor shell = new ShellCommandExecutor(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);

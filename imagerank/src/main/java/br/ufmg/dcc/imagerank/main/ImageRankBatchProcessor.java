@@ -1,7 +1,9 @@
 package br.ufmg.dcc.imagerank.main;
 
+import java.io.File;
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -9,6 +11,7 @@ import br.ufmg.dcc.imagerank.constants.ImageRankConstants;
 import br.ufmg.dcc.imagerank.exception.ProcessorException;
 import br.ufmg.dcc.imagerank.lac.converter.LACQueryFileConverter;
 import br.ufmg.dcc.imagerank.pairs.generator.RandomPairGenerator;
+import br.ufmg.dcc.imagerank.shell.util.ShellCommandExecutor;
 import br.ufmg.dcc.imagerank.weka.util.DiscretizeDataSet;
 import br.ufmg.dcc.imagerank.weka.util.WekaConversor;
 
@@ -35,7 +38,7 @@ public class ImageRankBatchProcessor
 	{
 		try
 		{
-			if (args == null || args.length < 5)
+			if (args == null || args.length < 8)
 			{
 				String parameters = "\n\tParâmetro 1: diretorioBase (Path raiz para o subdiretório de imagens. Ex: /opt/extrai_descritores)"
 						+ "\n\tParâmetro 2: diretorioImagens (Nome do subdiretório de imagens. Ex: imagens)"
@@ -43,7 +46,9 @@ public class ImageRankBatchProcessor
 						+ "\n\tParâmetro 4: diretorioPares (Nome do subdiretório para gravação do arquivos de pares. Ex: pares)"
 						+ "\n\tParâmetro 5: diretorioLACDataset (Nome do subdiretório para gravação do arquivo de treino do LAC. Ex: lac_dataset)"
 						+ "\n\tParâmetro 6: arquivoParesOriginal (Path completo para o arquivo de pares original. Ex: /opt/pares/arquivo-pares.dat)"
-						+ "\n\tParâmetro 7 <opcional>: totalParesGerar (Total de pares para geração. Ex: 500000 - Default: 100000 )"
+						+ "\n\tParâmetro 7: diretorioExecucaoLAC (Path completo para execução do LAC. Ex: /imagerank/bin/lac)"
+						+ "\n\tParâmetro 8: diretorioSaidaLAC (Path completo para gravação do arquivo de sáida do LAC. Ex: /imagerank/lac_output)"
+						+ "\n\tParâmetro 9 <opcional>: totalParesGerar (Total de pares para geração. Ex: 500000 - Default: 100000 )"
 						+ "\n"
 						;
 				throw new ProcessorException("Parâmetros obrigatórios não informados." + parameters);
@@ -56,13 +61,15 @@ public class ImageRankBatchProcessor
 			String diretorioPares = args[3];
 			String diretorioLACDataset = args[4];
 			String arquivoParesOriginal = args[5];
+			String diretorioExecucaoLAC = args[6];
+			String diretorioSaidaLAC = args[7];
 			int totalParesGerar = 0;
 
-			if (args.length >= 7)
+			if (args.length >= 9)
 			{
 				try
 				{
-					totalParesGerar = new Integer(args[6]);
+					totalParesGerar = new Integer(args[8]);
 				}
 				catch (Exception e)
 				{
@@ -124,6 +131,13 @@ public class ImageRankBatchProcessor
 			converter.convert(true, false);
 
 			LOG.info("[GERAÇÃO ARQUIVO TREINO FORMATO LAC] - FIM");
+
+			// Executa o algoritmo do LAC
+			LOG.info("[EXECUTANDO ALGORITMO LAC] - INICIO");
+
+			runLAC(diretorioBase, diretorioLACDataset, diretorioExecucaoLAC, diretorioSaidaLAC);
+
+			LOG.info("[EXECUTANDO ALGORITMO LAC] - FIM");
 		}
 		catch (ProcessorException e)
 		{
@@ -155,5 +169,61 @@ public class ImageRankBatchProcessor
 	private static void discretizeWekaFile(String arquivoParesWeka, String arquivoParesDiscretizados) throws Exception
 	{
 		DiscretizeDataSet.discretize(arquivoParesWeka, arquivoParesDiscretizados);
+	}
+
+	/**
+	 * Executa o algoritmo do LAC, considerando somente o dataset de treino (processo realizado para gerar cache de leitura do dataset de treino e melhorar a performance na consulta online)
+	 * @param diretorioBaseCompleta
+	 * @param diretorioLACDataset
+	 * @param diretorioExecucaoLAC
+	 * @param diretorioSaidaLAC
+	 * @throws ProcessorException
+	 */
+	private static void runLAC(String diretorioBaseCompleta, String diretorioLACDataset, String diretorioExecucaoLAC, String diretorioSaidaLAC) throws ProcessorException
+	{
+		String comando = "lazy";
+		String dataSetTreino = new StringBuilder(diretorioBaseCompleta).append(File.separator).append(diretorioLACDataset).append(File.separator).append(ImageRankConstants.LAC_TRAINING_FILENAME).toString();
+
+		String[] parametros = { "-i" // dataset de treino
+							  , dataSetTreino
+
+							  // suporte mínimo
+							  , "-s" // parâmetro
+							  , "1" // valor
+
+							  // confiança mínima
+							  , "-c" // parâmetro
+							  , "0.01" // valor
+
+							  // quantidade máxima de regras a serem geradas
+							  , "-m" // parâmetro
+							  , "2" // valor
+
+							  // cache
+							  , "-e" // parâmetro
+							  , "10000000" // valor
+
+							  // cache do dataset de treino
+							  , "-w" // parâmetro
+							  , "1" // valor
+
+							  // processa somente arquivo de treino
+							  , "-z" // parâmetro
+							  , "1" // valor
+							  };
+
+		ShellCommandExecutor shell = new ShellCommandExecutor(diretorioExecucaoLAC, comando, parametros, diretorioSaidaLAC, ImageRankConstants.LAC_OUTPUT_FILENAME);
+		int status = shell.execute();
+
+		if (status != 0)
+		{
+			String msgErro = StringUtils.EMPTY;
+			if (shell.getSaidaErro() != null && !shell.getSaidaErro().isEmpty())
+			{
+				msgErro = StringUtils.join(shell.getSaidaErro().toArray(), '\n').trim();
+			}
+
+			throw new ProcessorException(String.format("Ocorreu um erro inesperado na execução do LAC.\nDETALHE: \"%s\".", msgErro));
+		}
 	}
 }
