@@ -92,8 +92,11 @@ public class LACQueryFileConverter
 			// adiciona a coluna "pair_id" às instâncias
 			this.addPairIdToInstances(data);
 
-			// embaralha as instâncias
-			data.randomize(new Random(System.currentTimeMillis()));
+			if (generateTrainingFile && generateTestFile)
+			{
+				// embaralha as instâncias
+				data.randomize(new Random(System.currentTimeMillis()));
+			}
 
 			// obtém os ids das imagens de consulta
 			Set<String> queriesId = this.getQueriesId(data);
