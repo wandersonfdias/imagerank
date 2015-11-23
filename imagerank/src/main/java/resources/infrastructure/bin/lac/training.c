@@ -51,19 +51,10 @@ int read_training_set(char* training) {
 			if (fp!=NULL) {
 
 				// VARIAVEIS AUXILIARES
-				long SIZEOF_CLASS_NAME, SIZEOF_COUNT_TARGET, SIZEOF_TARGET_ID, SIZEOF_ITEMSETS, SIZEOF_SYMBOL_TABLE, SIZEOF_ITEM_MAP, SIZEOF_TID_CLASSES;
-
 				fscanf( fp
-					   , "N_TRANSACTIONS=%d N_ITEMSETS=%d SIZEOF_CLASS_NAME=%lu SIZEOF_COUNT_TARGET=%lu SIZEOF_TARGET_ID=%lu SIZEOF_ITEMSETS=%lu SIZEOF_SYMBOL_TABLE=%lu SIZEOF_ITEM_MAP=%lu SIZEOF_TID_CLASSES=%lu"
+					   , "N_TRANSACTIONS=%d N_ITEMSETS=%d"
 					   , &N_TRANSACTIONS
 					   , &N_ITEMSETS
-					   , &SIZEOF_CLASS_NAME
-					   , &SIZEOF_COUNT_TARGET
-					   , &SIZEOF_TARGET_ID
-					   , &SIZEOF_ITEMSETS
-					   , &SIZEOF_SYMBOL_TABLE
-					   , &SIZEOF_ITEM_MAP
-					   , &SIZEOF_TID_CLASSES
 					   );
 			    fclose(fp);
 
@@ -74,27 +65,28 @@ int read_training_set(char* training) {
 					hasCache = 1;
 
 					/*
-					printf( "\n N_TRANSACTIONS=%d N_ITEMSETS=%d SIZEOF_CLASS_NAME=%lu SIZEOF_COUNT_TARGET=%lu SIZEOF_TARGET_ID=%lu SIZEOF_ITEMSETS=%lu SIZEOF_SYMBOL_TABLE=%lu SIZEOF_ITEM_MAP=%lu SIZEOF_TID_CLASSES=%lu \n"
+					printf( "\n N_TRANSACTIONS=%d N_ITEMSETS=%d \n"
 						   , N_TRANSACTIONS
 						   , N_ITEMSETS
-						   , SIZEOF_CLASS_NAME
-						   , SIZEOF_COUNT_TARGET
-						   , SIZEOF_TARGET_ID
-						   , SIZEOF_ITEMSETS
-						   , SIZEOF_SYMBOL_TABLE
-						   , SIZEOF_ITEM_MAP
-						   , SIZEOF_TID_CLASSES
 						   );
 					*/
 
 					// COUNT_TARGET
 					fp = fopen(COUNT_TARGET_FILE, "r");
-					fread(&COUNT_TARGET, SIZEOF_COUNT_TARGET, 1, fp);
+					while (!feof(fp)) {
+						int key, value;
+						fscanf(fp, "KEY:%d VALUE:%d\n", &key, &value);
+						COUNT_TARGET[key] = value;
+					}
 				    fclose(fp);
 
 					// TARGET_ID
 					fp = fopen(TARGET_ID_FILE, "r");
-					fread(&TARGET_ID, SIZEOF_TARGET_ID, 1, fp);
+					while (!feof(fp)) {
+						int key, value;
+						fscanf(fp, "KEY:%d VALUE:%d\n", &key, &value);
+						TARGET_ID[key] = value;
+					}
 				    fclose(fp);
 
 					// ITEMSETS
@@ -138,7 +130,7 @@ int read_training_set(char* training) {
 									   , &LAYOUT_KEY
 									   , &LAYOUT_VALUE
 									   );
-								ITEMSETS[KEY].layout[LAYOUT_KEY] = LAYOUT_VALUE;
+								ITEMSETS[KEY].layout[j] = LAYOUT_VALUE;
 							}
 						}
 					}
@@ -287,27 +279,24 @@ int read_training_set(char* training) {
 			// VARIAVEIS AUXILIARES
 			FILE* fp = fopen(VAR_AUX_FILE, "w");
 			fprintf( fp
-				   , "N_TRANSACTIONS=%d N_ITEMSETS=%d SIZEOF_CLASS_NAME=%lu SIZEOF_COUNT_TARGET=%lu SIZEOF_TARGET_ID=%lu SIZEOF_ITEMSETS=%lu SIZEOF_SYMBOL_TABLE=%lu SIZEOF_ITEM_MAP=%lu SIZEOF_TID_CLASSES=%lu"
+				   , "N_TRANSACTIONS=%d N_ITEMSETS=%d"
 				   , N_TRANSACTIONS
 				   , N_ITEMSETS
-				   , sizeof(CLASS_NAME)
-				   , sizeof(COUNT_TARGET)
-				   , sizeof(TARGET_ID)
-				   , sizeof(ITEMSETS)
-				   , sizeof(SYMBOL_TABLE)
-				   , sizeof(ITEM_MAP)
-				   , sizeof(TID_CLASSES)
 				   );
 		    fclose(fp);
 
 			// COUNT_TARGET
 			fp = fopen(COUNT_TARGET_FILE, "w");
-			fwrite(&COUNT_TARGET, sizeof(COUNT_TARGET), 1, fp);
+			for (int i=0; i<MAX_CLASSES; i++) {
+				fprintf(fp, "KEY:%d VALUE:%d\n", i, COUNT_TARGET[i]);
+			}
 		    fclose(fp);
 
 			// TARGET_ID
 			fp = fopen(TARGET_ID_FILE, "w");
-			fwrite(&TARGET_ID, sizeof(TARGET_ID), 1, fp);
+			for (int i=0; i<MAX_CLASSES; i++) {
+				fprintf(fp, "KEY:%d VALUE:%d\n", i, TARGET_ID[i]);
+			}
 		    fclose(fp);
 
 		    // ITEMSETS
