@@ -87,8 +87,7 @@ public class ProcessadorParImagemConsulta
 
 		if (LOG.isDebugEnabled())
 		{
-			System.out.printf("imagem origem: %s - imagem destino: %s", this.par.getImagem1().getPath(), this.par.getImagem2().getPath());
-			System.out.println();
+			LOG.info(String.format("imagem origem: %s - imagem destino: %s", this.par.getImagem1().getPath(), this.par.getImagem2().getPath()));
 		}
 
 		// gera cache dos descritores da imagem de consulta (imagem1), para performance
@@ -120,15 +119,13 @@ public class ProcessadorParImagemConsulta
 
 			if (LOG.isDebugEnabled())
 			{
-				System.out.printf("descritor: %s - distância: %s", descritorBaseConsulta.getName(), distance);
-				System.out.println();
+				LOG.info(String.format("descritor: %s - distância: %s", descritorBaseConsulta.getName(), distance));
 			}
 		}
 
 		if (LOG.isDebugEnabled())
 		{
-			System.out.println();
-			System.out.println(StringUtils.repeat("-", 20));
+			LOG.info(StringUtils.repeat("-", 20));
 		}
 	}
 

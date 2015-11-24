@@ -241,11 +241,7 @@ public class ExtratorPares
 
 		for (final ParDTO par : pares)
 		{
-			if (LOG.isDebugEnabled())
-			{
-				System.out.printf("Processando par: %s - %s", par.getImagem1().getPath(), par.getImagem2().getPath());
-				System.out.println();
-			}
+			LOG.info(String.format("Processando par: %s - %s", par.getImagem1().getPath(), par.getImagem2().getPath()));
 
 			poolThread.submit(new Runnable()
 			{
@@ -276,7 +272,7 @@ public class ExtratorPares
 			{
 				if (tempo%5==0)
 				{
-					System.out.println("Pares processados: " + contador + " - " + tempo + "s");
+					LOG.info("Pares processados: " + contador + " - " + tempo + "s");
 				}
 				Thread.sleep(1000);
 				tempo++;
@@ -287,7 +283,7 @@ public class ExtratorPares
 			}
 		}
 		while(!poolThread.isTerminated());
-		System.out.println("Pares processados: " + contador + " - " + tempo + "s");
+		LOG.info("Pares processados: " + contador + " - " + tempo + "s");
 
 		if (errosProcessamento.size() > 0)
 		{

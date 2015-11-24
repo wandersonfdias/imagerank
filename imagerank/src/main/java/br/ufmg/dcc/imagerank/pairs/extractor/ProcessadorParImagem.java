@@ -52,8 +52,7 @@ public class ProcessadorParImagem
 
 		if (LOG.isDebugEnabled())
 		{
-			System.out.printf("imagem origem: %s - imagem destino: %s", this.par.getImagem1().getPath(), this.par.getImagem2().getPath());
-			System.out.println();
+			LOG.info(String.format("imagem origem: %s - imagem destino: %s", this.par.getImagem1().getPath(), this.par.getImagem2().getPath()));
 		}
 
 		for (File descriptorFile : this.descriptors)
@@ -70,15 +69,13 @@ public class ProcessadorParImagem
 
 			if (LOG.isDebugEnabled())
 			{
-				System.out.printf("descritor: %s - distância: %s", descriptorFile.getName(), distance);
-				System.out.println();
+				LOG.info(String.format("descritor: %s - distância: %s", descriptorFile.getName(), distance));
 			}
 		}
 
 		if (LOG.isDebugEnabled())
 		{
-			System.out.println();
-			System.out.println(StringUtils.repeat("-", 20));
+			LOG.info(StringUtils.repeat("-", 20));
 		}
 	}
 
