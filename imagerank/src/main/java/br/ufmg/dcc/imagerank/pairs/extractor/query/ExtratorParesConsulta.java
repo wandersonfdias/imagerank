@@ -221,7 +221,10 @@ public class ExtratorParesConsulta
 
 		for (final ParDTO par : pares)
 		{
-			LOG.info(String.format("Processando par: %s - %s", par.getImagem1().getPath(), par.getImagem2().getPath()));
+			if (LOG.isDebugEnabled())
+			{
+				LOG.info(String.format("Processando par: %s - %s", par.getImagem1().getPath(), par.getImagem2().getPath()));
+			}
 
 			poolThread.submit(new Runnable()
 			{
