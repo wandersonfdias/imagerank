@@ -1,10 +1,26 @@
 #!/bin/bash
-ROOT_DIR="/home/ec2-user/data/imagerank"
 
-arquivoLog="${ROOT_DIR}/processa_base_consulta.log"
+# valida imagem para processamento
+imagemProcessamento=$1
+if [ -z ${imagemProcessamento} ] || [ ! -f ${imagemProcessamento} ]; then
 
+	echo "Imagem de processamento não informada ou não existente. Favor verificar.";
+	exit 1;
+
+elif [ ${imagemProcessamento##*.} != "jpg" ]; then
+
+	echo "Imagem de processamento inválida. A imagem deve ter a extensão '.jpg'. Favor verificar.";
+	exit 1;
+
+fi
+
+# parametros para rodar o processo online
+ROOT_DIR="/home/imagerank/data/imagerank"
+diretorioBaseConsultaPadrao="${ROOT_DIR}/base_consulta_padrao"
+diretorioBaseProcessamentoConsulta="${ROOT_DIR}/processamento_consulta/"`date "+%Y%m%d"` # o diretorio base para processamento contem o ano, mes e dia
 diretorioBaseCompleta="${ROOT_DIR}/base_completa"
-diretorioBaseConsulta="${ROOT_DIR}/base_consulta"
+diretorioBaseConsulta="${diretorioBaseProcessamentoConsulta}/"`uuidgen`  # gera sempre um diretorio dinamico
+arquivoLog="${diretorioBaseConsulta}/processa_base_consulta.log"
 diretorioImagens="imagens"
 diretorioDescritores="descritores"
 diretorioPares="pares"
@@ -14,5 +30,14 @@ diretorioSaidaLAC="${diretorioBaseConsulta}/lac_output"
 diretorioSaidaScore="score_output"
 totalParesGerar=4000
 
-echo -e "Acompanhe o log do arquivo '"$arquivoLog"'..."
+# clona a base padrao de consulta para a base de processamento
+mkdir -p ${diretorioBaseProcessamentoConsulta} # cria o diretorio base, caso nao exista
+cp -fr ${diretorioBaseConsultaPadrao} ${diretorioBaseConsulta}
+chmod 777 -R ${diretorioBaseConsulta}
+
+# copia a imagem para processamento da consulta
+cp ${imagemProcessamento} "${diretorioBaseConsulta}/${diretorioImagens}/"
+
+# roda o processo online
+echo "Acompanhe o log do arquivo '"$arquivoLog"'..."
 java -Dfile.encoding=UTF-8 -cp ${ROOT_DIR}/imagerank-1.0.0-SNAPSHOT.jar br.ufmg.dcc.imagerank.main.ImageRankOnlineQueryProcessor $diretorioBaseCompleta $diretorioBaseConsulta $diretorioImagens $diretorioDescritores $diretorioPares $diretorioLACDataset $diretorioExecucaoLAC $diretorioSaidaLAC $diretorioSaidaScore $totalParesGerar 2> $arquivoLog

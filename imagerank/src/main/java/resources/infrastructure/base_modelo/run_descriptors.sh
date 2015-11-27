@@ -6,16 +6,16 @@ maskOutputPath="./mascaras_out/"
 
 outputDescrPath="./descritores/"
 
-binPath="../bin/"
+binPath="../bin/" # ajustar path conforme ambiente de instalacao
 
 tmp="./tmp/"
 
 # remove diretorios de descritores
 if [ -d ${outputDescrPath} ]; then
-	
+
 	rm -r ${outputDescrPath}
-	
-fi	
+
+fi
 
 # cria o diretorio
 mkdir -p ${outputDescrPath}
@@ -29,27 +29,27 @@ do
 	inputMaskName=${maskInputPath}${file_dir}${file_mask}.pgm
 	inputImage=$file
 	file=`basename $file`
-	file=`basename $file .jpg` # retira a extensao da imagem	
-	
+	file=`basename $file .jpg` # retira a extensao da imagem
+
 	#echo "file = "$file
 	#echo "file_dir = "$file_dir
 	#echo "inputImage = "$inputImage
 	#echo "inputMaskName = "$inputMaskName
 	#echo "outputDescrPath = "${outputDescrPath}
-	
+
 	###################
-	# BIC descriptor	
-	################### 
+	# BIC descriptor
+	###################
 	descriptor="bic"
 	descriptor_dir=${outputDescrPath}${descriptor}"/"${file_dir}
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_bic $inputImage $inputMaskName $descriptor_file # extrai o descritor
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_bic $inputImage $inputMaskName $descriptor_file # extrai o descritor
+
+
 	###################
 	# CCV descriptor
 	###################
@@ -58,15 +58,15 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
 
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_ccv $inputImage $inputMaskName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
-	
-	
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_ccv $inputImage $inputMaskName $descriptor_temp_file # extrai o descritor binario
+	$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
+
+
 	###################
 	# GCH descriptor
 	###################
@@ -75,15 +75,15 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		 
-	./$binPath/extrai_gch $inputImage $inputMaskName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_gch $inputImage $inputMaskName $descriptor_temp_file # extrai o descritor binario
+	$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
+
+
 	###################
 	# LCH descriptor
 	###################
@@ -92,15 +92,15 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	 
-	echo "\t => Extraindo descritor: "$descriptor		 
-	./$binPath/extrai_lch $inputImage $inputMaskName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_lch $inputImage $inputMaskName $descriptor_temp_file # extrai o descritor binario
+	$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
+
+
 	###################
 	# Convert image PPM
 	###################
@@ -108,8 +108,8 @@ do
 	outputName=${outputDir}${file}".ppm"
 	mkdir -p $outputDir # garante a criacao do diretorio
 	convert $inputImage $outputName # converte o arquivo
-	
-	
+
+
 	###################
 	# ACC descriptor
 	###################
@@ -118,28 +118,28 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_acc $outputName $inputMaskName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_acc $outputName $inputMaskName $descriptor_temp_file # extrai o descritor binario
+	$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
+
+
 	###################
 	# EOAC descriptor
 	###################
 	descriptor="eoac"
 	descriptor_dir=${outputDescrPath}${descriptor}"/"${file_dir}
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_eoac $outputName $descriptor_file # extrai o descritor
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_eoac $outputName $descriptor_file # extrai o descritor
+
+
 	###################
 	# LAS descriptor
 	###################
@@ -148,15 +148,15 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_las $outputName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/floatbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_las $outputName $descriptor_temp_file # extrai o descritor binario
+	$binPath/floatbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
+
+
 	###################
 	# QCCH descriptor
 	###################
@@ -165,15 +165,15 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_qcch $outputName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/doublebin2txt $descriptor_temp_file $descriptor_file 0 # converte o descritor em texto
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_qcch $outputName $descriptor_temp_file # extrai o descritor binario
+	$binPath/doublebin2txt $descriptor_temp_file $descriptor_file 0 # converte o descritor em texto
+
+
 	###################
 	# SID descriptor
 	###################
@@ -182,15 +182,15 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_sid $outputName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/doublebin2txt $descriptor_temp_file $descriptor_file 1 # converte o descritor em texto
-	
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_sid $outputName $descriptor_temp_file # extrai o descritor binario
+	$binPath/doublebin2txt $descriptor_temp_file $descriptor_file 1 # converte o descritor em texto
+
+
 	###################
 	# Convert image PGM
 	###################
@@ -198,9 +198,9 @@ do
 	outputName=${outputDir}${file}".pgm"
 	mkdir -p $outputDir # garante a criacao do diretorio
 	convert $inputImage $outputName # converte o arquivo
-	
-	
-	###################	
+
+
+	###################
 	# UNSER descriptor
 	###################
 	descriptor="unser"
@@ -208,18 +208,18 @@ do
 	descriptor_file=${descriptor_dir}${file}"."${descriptor}
 	descriptor_temp_dir=${tmp}"/descriptors/"${descriptor}"/"
 	descriptor_temp_file=${descriptor_temp_dir}${file}"_convert."${descriptor}
-	
+
 	mkdir -p $descriptor_dir # garante a criacao do diretorio
 	mkdir -p $descriptor_temp_dir # garante a criacao do diretorio
-	
-	echo "\t => Extraindo descritor: "$descriptor		
-	./$binPath/extrai_unser $outputName $inputMaskName $descriptor_temp_file # extrai o descritor binario
-	./$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
-		
-	
+
+	echo "\t => Extraindo descritor: "$descriptor
+	$binPath/extrai_unser $outputName $inputMaskName $descriptor_temp_file # extrai o descritor binario
+	$binPath/ucharbin2txt $descriptor_temp_file $descriptor_file # converte o descritor em texto
+
+
 	#############################
 	#limpa arquivos temporarios
 	rm -r ${tmp}
-		
+
 done
 
