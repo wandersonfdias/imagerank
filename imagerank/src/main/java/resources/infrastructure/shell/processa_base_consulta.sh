@@ -32,6 +32,7 @@ totalParesGerar=4000
 
 # clona a base padrao de consulta para a base de processamento
 mkdir -p ${diretorioBaseProcessamentoConsulta} # cria o diretorio base, caso nao exista
+rm -fr ${diretorioBaseConsulta} # remove o diretorio da consulta, para permitir n consultas na mesma data
 cp -fr ${diretorioBaseConsultaPadrao} ${diretorioBaseConsulta}
 chmod 777 -R ${diretorioBaseConsulta}
 
