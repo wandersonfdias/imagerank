@@ -108,6 +108,7 @@ do
 	outputName=${outputDir}${file}".ppm"
 	mkdir -p $outputDir # garante a criacao do diretorio
 	convert $inputImage $outputName # converte o arquivo
+	sed -i '/^#CREATOR: /d' $outputName # tira comentarios do pgm
 
 
 	###################
@@ -198,6 +199,7 @@ do
 	outputName=${outputDir}${file}".pgm"
 	mkdir -p $outputDir # garante a criacao do diretorio
 	convert $inputImage $outputName # converte o arquivo
+	sed -i '/^#CREATOR: /d' $outputName # tira comentarios do pgm
 
 
 	###################

@@ -19,6 +19,6 @@ do
 
 	mkdir -p ${directoryOutput} # garante que a estrutura de diretorios/subdiretorios exista
 	convert -compress none $inputImageName $outputImageName # converte a imagem original em pgm
-	sed -i '/#/d' $outputImageName # tira comentarios do pgm
+	sed -i '/#CREATOR/d' $outputImageName # tira comentarios do pgm
 done
 
